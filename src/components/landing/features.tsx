@@ -47,7 +47,7 @@ export function Features() {
         </div>
         <div className="mt-16 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
           {features.map((feature) => (
-            <Card key={feature.title} className="border-none shadow-sm">
+            <Card key={feature.title} className="border-none shadow-sm py-6">
               <CardHeader>
                 <div className="mb-4 inline-flex size-12 items-center justify-center rounded-lg bg-primary/10">
                   <feature.icon className="size-6 text-primary" />
