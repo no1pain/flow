@@ -29,10 +29,9 @@ export default function RegisterPage() {
   } = useForm<RegisterFormData>({
     resolver: zodResolver(registerSchema),
     defaultValues: {
-      name: '',
+      username: '',
       email: '',
       password: '',
-      confirmPassword: '',
     },
   });
 
@@ -41,10 +40,9 @@ export default function RegisterPage() {
     setError(null);
 
     const formData = new FormData();
-    formData.append('name', data.name);
+    formData.append('username', data.username);
     formData.append('email', data.email);
     formData.append('password', data.password);
-    formData.append('confirmPassword', data.confirmPassword);
 
     try {
       const result = await registerAction(formData);
@@ -75,15 +73,15 @@ export default function RegisterPage() {
               </div>
             )}
             <div className="space-y-2">
-              <Label htmlFor="name">Full Name</Label>
+              <Label htmlFor="username">Username</Label>
               <Input
-                id="name"
+                id="username"
                 type="text"
-                placeholder="John Doe"
-                {...register('name')}
-                className={errors.name ? 'border-red-500' : ''}
+                placeholder="johndoe"
+                {...register('username')}
+                className={errors.username ? 'border-red-500' : ''}
               />
-              {errors.name && <p className="text-sm text-red-500">{errors.name.message}</p>}
+              {errors.username && <p className="text-sm text-red-500">{errors.username.message}</p>}
             </div>
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
@@ -106,19 +104,6 @@ export default function RegisterPage() {
                 className={errors.password ? 'border-red-500' : ''}
               />
               {errors.password && <p className="text-sm text-red-500">{errors.password.message}</p>}
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="confirmPassword">Confirm Password</Label>
-              <Input
-                id="confirmPassword"
-                type="password"
-                placeholder="••••••••"
-                {...register('confirmPassword')}
-                className={errors.confirmPassword ? 'border-red-500' : ''}
-              />
-              {errors.confirmPassword && (
-                <p className="text-sm text-red-500">{errors.confirmPassword.message}</p>
-              )}
             </div>
             <Button type="submit" className="w-full" disabled={isLoading}>
               {isLoading ? 'Creating account...' : 'Create Account'}

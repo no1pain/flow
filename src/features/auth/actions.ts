@@ -38,10 +38,9 @@ export async function register(formData: FormData) {
   const supabase = await createClient();
 
   const data = {
-    name: formData.get('name') as string,
+    username: formData.get('username') as string,
     email: formData.get('email') as string,
     password: formData.get('password') as string,
-    confirmPassword: formData.get('confirmPassword') as string,
   };
 
   const validatedFields = registerSchema.safeParse(data);
@@ -58,7 +57,7 @@ export async function register(formData: FormData) {
     password: validatedFields.data.password,
     options: {
       data: {
-        full_name: validatedFields.data.name,
+        username: validatedFields.data.username,
       },
     },
   });
