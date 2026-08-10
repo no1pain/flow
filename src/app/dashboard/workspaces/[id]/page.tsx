@@ -93,12 +93,16 @@ export default function WorkspaceDetailPage() {
                     <CardTitle>Projects</CardTitle>
                     <CardDescription>Manage your workspace projects</CardDescription>
                   </div>
-                  <Button size="sm">New Project</Button>
+                  <Button size="sm" onClick={() => router.push('/dashboard/projects')}>
+                    View All
+                  </Button>
                 </div>
               </CardHeader>
               <CardContent>
                 <div className="text-center py-8 text-slate-500 dark:text-slate-400">
-                  No projects yet. Create your first project to get started.
+                  <Button variant="link" onClick={() => router.push('/dashboard/projects')}>
+                    Go to Projects page to manage your workspace projects
+                  </Button>
                 </div>
               </CardContent>
             </Card>
