@@ -3,43 +3,23 @@ export type Json = string | number | boolean | null | { [key: string]: Json | un
 export interface Database {
   public: {
     Tables: {
-      profiles: {
-        Row: {
-          id: string;
-          username: string | null;
-          avatar_url: string | null;
-          created_at: string;
-        };
-        Insert: {
-          id: string;
-          username?: string | null;
-          avatar_url?: string | null;
-          created_at?: string;
-        };
-        Update: {
-          id?: string;
-          username?: string | null;
-          avatar_url?: string | null;
-          created_at?: string;
-        };
-      };
       workspaces: {
         Row: {
           id: string;
           name: string;
-          owner_id: string | null;
+          owner_id: string;
           created_at: string;
         };
         Insert: {
           id?: string;
           name: string;
-          owner_id?: string | null;
+          owner_id?: string;
           created_at?: string;
         };
         Update: {
           id?: string;
           name?: string;
-          owner_id?: string | null;
+          owner_id?: string;
           created_at?: string;
         };
       };
@@ -71,31 +51,34 @@ export interface Database {
           id: string;
           workspace_id: string;
           email: string;
-          role: 'ADMIN' | 'MEMBER' | 'GUEST';
+          role: 'OWNER' | 'ADMIN' | 'MEMBER' | 'GUEST';
           invited_by: string;
-          status: 'PENDING' | 'ACCEPTED' | 'DECLINED' | 'EXPIRED';
-          created_at: string;
+          token: string;
           expires_at: string;
+          accepted_at: string | null;
+          created_at: string;
         };
         Insert: {
           id?: string;
           workspace_id: string;
           email: string;
-          role: 'ADMIN' | 'MEMBER' | 'GUEST';
+          role?: 'OWNER' | 'ADMIN' | 'MEMBER' | 'GUEST';
           invited_by?: string;
-          status?: 'PENDING' | 'ACCEPTED' | 'DECLINED' | 'EXPIRED';
-          created_at?: string;
+          token?: string;
           expires_at?: string;
+          accepted_at?: string | null;
+          created_at?: string;
         };
         Update: {
           id?: string;
           workspace_id?: string;
           email?: string;
-          role?: 'ADMIN' | 'MEMBER' | 'GUEST';
+          role?: 'OWNER' | 'ADMIN' | 'MEMBER' | 'GUEST';
           invited_by?: string;
-          status?: 'PENDING' | 'ACCEPTED' | 'DECLINED' | 'EXPIRED';
-          created_at?: string;
+          token?: string;
           expires_at?: string;
+          accepted_at?: string | null;
+          created_at?: string;
         };
       };
       projects: {
@@ -105,7 +88,7 @@ export interface Database {
           name: string;
           description: string | null;
           status: 'ACTIVE' | 'ARCHIVED';
-          created_by: string | null;
+          created_by: string;
           created_at: string;
         };
         Insert: {
@@ -114,7 +97,7 @@ export interface Database {
           name: string;
           description?: string | null;
           status?: 'ACTIVE' | 'ARCHIVED';
-          created_by?: string | null;
+          created_by?: string;
           created_at?: string;
         };
         Update: {
@@ -123,74 +106,30 @@ export interface Database {
           name?: string;
           description?: string | null;
           status?: 'ACTIVE' | 'ARCHIVED';
-          created_by?: string | null;
+          created_by?: string;
           created_at?: string;
         };
       };
-      tasks: {
+      project_members: {
         Row: {
           id: string;
           project_id: string;
-          title: string;
-          description: string | null;
-          status: 'TODO' | 'IN_PROGRESS' | 'DONE';
-          priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT';
-          assignee_id: string | null;
-          created_by: string | null;
+          user_id: string;
+          role: 'OWNER' | 'ADMIN' | 'MEMBER' | 'GUEST';
           created_at: string;
-          updated_at: string;
         };
         Insert: {
           id?: string;
           project_id: string;
-          title: string;
-          description?: string | null;
-          status?: 'TODO' | 'IN_PROGRESS' | 'DONE';
-          priority?: 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT';
-          assignee_id?: string | null;
-          created_by?: string | null;
+          user_id: string;
+          role: 'OWNER' | 'ADMIN' | 'MEMBER' | 'GUEST';
           created_at?: string;
-          updated_at?: string;
         };
         Update: {
           id?: string;
           project_id?: string;
-          title?: string;
-          description?: string | null;
-          status?: 'TODO' | 'IN_PROGRESS' | 'DONE';
-          priority?: 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT';
-          assignee_id?: string | null;
-          created_by?: string | null;
-          created_at?: string;
-          updated_at?: string;
-        };
-      };
-      documents: {
-        Row: {
-          id: string;
-          workspace_id: string;
-          title: string;
-          content: Json | null;
-          created_by: string | null;
-          updated_at: string;
-          created_at: string;
-        };
-        Insert: {
-          id?: string;
-          workspace_id: string;
-          title: string;
-          content?: Json | null;
-          created_by?: string | null;
-          updated_at?: string;
-          created_at?: string;
-        };
-        Update: {
-          id?: string;
-          workspace_id?: string;
-          title?: string;
-          content?: Json | null;
-          created_by?: string | null;
-          updated_at?: string;
+          user_id?: string;
+          role?: 'OWNER' | 'ADMIN' | 'MEMBER' | 'GUEST';
           created_at?: string;
         };
       };

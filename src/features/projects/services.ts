@@ -1,5 +1,14 @@
 import { createClient } from '@/lib/supabase/client';
-import type { Project, ProjectInsert, ProjectUpdate, ProjectWithDetails } from './types';
+import type {
+  Project,
+  ProjectInsert,
+  ProjectUpdate,
+  ProjectWithDetails,
+  ProjectMember,
+  ProjectMemberInsert,
+  ProjectMemberUpdate,
+  ProjectMemberWithProfile,
+} from './types';
 
 const supabase = createClient();
 
@@ -53,14 +62,21 @@ export const projectService = {
 
     const projectsWithDetails = await Promise.all(
       (projects as Project[]).map(async (project) => {
-        const { count: taskCount } = await supabase
-          .from('tasks')
-          .select('*', { count: 'exact', head: true })
-          .eq('project_id', project.id);
+        const [{ count: taskCount }, { count: memberCount }] = await Promise.all([
+          supabase
+            .from('tasks')
+            .select('*', { count: 'exact', head: true })
+            .eq('project_id', project.id),
+          supabase
+            .from('project_members')
+            .select('*', { count: 'exact', head: true })
+            .eq('project_id', project.id),
+        ]);
 
         return {
           ...project,
           task_count: taskCount || 0,
+          member_count: memberCount || 0,
         } as ProjectWithDetails;
       })
     );
@@ -115,5 +131,67 @@ export const projectService = {
 
     if (error) throw error;
     return data as Project;
+  },
+
+  async getProjectMembers(projectId: string): Promise<ProjectMemberWithProfile[]> {
+    const { data, error } = await supabase
+      .from('project_members')
+      .select(
+        `
+        *,
+        profiles (
+          id,
+          username,
+          avatar_url
+        )
+      `
+      )
+      .eq('project_id', projectId)
+      .order('created_at', { ascending: true });
+
+    if (error) throw error;
+
+    return (data || []).map(
+      (member: {
+        id: string;
+        project_id: string;
+        user_id: string;
+        role: string;
+        created_at: string;
+        profiles: { id: string; username: string; avatar_url: string | null };
+      }) => ({
+        id: member.id,
+        project_id: member.project_id,
+        user_id: member.user_id,
+        role: member.role,
+        created_at: member.created_at,
+        profile: member.profiles,
+      })
+    ) as ProjectMemberWithProfile[];
+  },
+
+  async addProjectMember(member: ProjectMemberInsert): Promise<ProjectMember> {
+    const { data, error } = await supabase.from('project_members').insert(member).select().single();
+
+    if (error) throw error;
+    return data as ProjectMember;
+  },
+
+  async updateProjectMember(id: string, updates: ProjectMemberUpdate): Promise<ProjectMember> {
+    const { data, error } = await supabase
+      .from('project_members')
+      .update(updates)
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data as ProjectMember;
+  },
+
+  async removeProjectMember(id: string): Promise<void> {
+    const { error } = await supabase.from('project_members').delete().eq('id', id);
+
+    if (error) throw error;
   },
 };

@@ -7,15 +7,19 @@ import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { ArrowLeft, Settings, Archive, CheckCircle, FolderKanban, Plus } from 'lucide-react';
+import { ArrowLeft, Settings, Archive, CheckCircle, FolderKanban, Plus, Users } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { archiveProject, activateProject } from '@/features/projects/actions';
+import { AddMemberDialog } from '@/features/projects/components/AddMemberDialog';
+import { ProjectMembersList } from '@/features/projects/components/ProjectMembersList';
+import { useState } from 'react';
 
 export default function ProjectDetailPage() {
   const params = useParams();
   const projectId = params.id as string;
   const router = useRouter();
   const currentWorkspace = useWorkspaceStore((state) => state.currentWorkspace);
+  const [addMemberOpen, setAddMemberOpen] = useState(false);
 
   const { data: project, isLoading, error } = useProjectWithDetails(projectId);
 
@@ -127,8 +131,8 @@ export default function ProjectDetailPage() {
                     <p className="text-2xl font-bold">{project.task_count || 0}</p>
                   </div>
                   <div className="p-4 bg-slate-50 dark:bg-slate-700 rounded-lg">
-                    <p className="text-sm text-slate-600 dark:text-slate-400">Status</p>
-                    <p className="text-2xl font-bold">{project.status}</p>
+                    <p className="text-sm text-slate-600 dark:text-slate-400">Members</p>
+                    <p className="text-2xl font-bold">{project.member_count || 0}</p>
                   </div>
                 </div>
               </CardContent>
@@ -163,6 +167,26 @@ export default function ProjectDetailPage() {
           </div>
 
           <div className="space-y-6">
+            <Card>
+              <CardHeader>
+                <div className="flex justify-between items-center">
+                  <div>
+                    <CardTitle>Team Members</CardTitle>
+                    <CardDescription>Manage project team</CardDescription>
+                  </div>
+                  {isActive && (
+                    <Button size="sm" onClick={() => setAddMemberOpen(true)}>
+                      <Users className="size-4 mr-2" />
+                      Add Member
+                    </Button>
+                  )}
+                </div>
+              </CardHeader>
+              <CardContent>
+                <ProjectMembersList projectId={projectId} canEdit={isActive} />
+              </CardContent>
+            </Card>
+
             <Card>
               <CardHeader>
                 <CardTitle>Project Details</CardTitle>
@@ -222,6 +246,8 @@ export default function ProjectDetailPage() {
           </div>
         </div>
       </div>
+
+      <AddMemberDialog projectId={projectId} open={addMemberOpen} onOpenChange={setAddMemberOpen} />
     </div>
   );
 }

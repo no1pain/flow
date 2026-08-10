@@ -2,7 +2,12 @@
 
 import { createClient } from '@/lib/supabase/server';
 import { revalidatePath } from 'next/cache';
-import type { ProjectInsert, ProjectUpdate } from './types';
+import type {
+  ProjectInsert,
+  ProjectUpdate,
+  ProjectMemberInsert,
+  ProjectMemberUpdate,
+} from './types';
 
 export async function createProject(project: ProjectInsert) {
   const supabase = await createClient();
@@ -117,4 +122,65 @@ export async function activateProject(id: string) {
   revalidatePath('/dashboard/projects');
   revalidatePath(`/dashboard/projects/${id}`);
   return data;
+}
+
+export async function addProjectMember(member: ProjectMemberInsert) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    throw new Error('Unauthorized');
+  }
+
+  const { data, error } = await supabase.from('project_members').insert(member).select().single();
+
+  if (error) throw error;
+
+  revalidatePath('/dashboard/projects');
+  revalidatePath(`/dashboard/projects/${member.project_id}`);
+  return data;
+}
+
+export async function updateProjectMember(id: string, updates: ProjectMemberUpdate) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    throw new Error('Unauthorized');
+  }
+
+  const { data, error } = await supabase
+    .from('project_members')
+    .update(updates)
+    .eq('id', id)
+    .select()
+    .single();
+
+  if (error) throw error;
+
+  revalidatePath('/dashboard/projects');
+  revalidatePath(`/dashboard/projects/${data.project_id}`);
+  return data;
+}
+
+export async function removeProjectMember(id: string, projectId: string) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    throw new Error('Unauthorized');
+  }
+
+  const { error } = await supabase.from('project_members').delete().eq('id', id);
+
+  if (error) throw error;
+
+  revalidatePath('/dashboard/projects');
+  revalidatePath(`/dashboard/projects/${projectId}`);
 }
