@@ -15,7 +15,7 @@ export function Footer() {
             <h4 className="mb-4 font-semibold">Product</h4>
             <ul className="space-y-2 text-sm text-muted-foreground">
               <li>
-                <a href="#" className="hover:text-foreground">
+                <a href="#features" className="hover:text-foreground">
                   Features
                 </a>
               </li>
@@ -55,7 +55,7 @@ export function Footer() {
                 </a>
               </li>
               <li>
-                <a href="#" className="hover:text-foreground">
+                <a href="mailto:contact@flow.dev" className="hover:text-foreground">
                   Contact
                 </a>
               </li>
@@ -64,15 +64,28 @@ export function Footer() {
           <div>
             <h4 className="mb-4 font-semibold">Connect</h4>
             <div className="flex gap-4">
-              <a href="#" className="text-muted-foreground hover:text-foreground">
+              <a
+                href="https://discord.gg/flow"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-muted-foreground hover:text-foreground"
+              >
                 <MessageCircle className="size-5" />
                 <span className="sr-only">Chat</span>
               </a>
-              <a href="#" className="text-muted-foreground hover:text-foreground">
+              <a
+                href="mailto:hello@flow.dev"
+                className="text-muted-foreground hover:text-foreground"
+              >
                 <Mail className="size-5" />
                 <span className="sr-only">Email</span>
               </a>
-              <a href="#" className="text-muted-foreground hover:text-foreground">
+              <a
+                href="https://flow.dev"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-muted-foreground hover:text-foreground"
+              >
                 <ExternalLink className="size-5" />
                 <span className="sr-only">Website</span>
               </a>

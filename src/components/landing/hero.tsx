@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { ArrowRight } from 'lucide-react';
 
@@ -17,13 +18,17 @@ export function Hero() {
             products faster. Experience the future of development today.
           </p>
           <div className="mt-10 flex items-center justify-center gap-4">
-            <Button size="lg" className="gap-2">
-              Get Started
-              <ArrowRight className="size-4" />
-            </Button>
-            <Button size="lg" variant="outline">
-              View Demo
-            </Button>
+            <Link href="/register">
+              <Button size="lg" className="gap-2">
+                Get Started
+                <ArrowRight className="size-4" />
+              </Button>
+            </Link>
+            <a href="#demo">
+              <Button size="lg" variant="outline">
+                View Demo
+              </Button>
+            </a>
           </div>
         </div>
       </div>

@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { ArrowRight } from 'lucide-react';
 
@@ -12,17 +13,21 @@ export function CTA() {
             trial today.
           </p>
           <div className="mt-10 flex items-center justify-center gap-4">
-            <Button size="lg" variant="secondary" className="gap-2">
-              Start Free Trial
-              <ArrowRight className="size-4" />
-            </Button>
-            <Button
-              size="lg"
-              variant="outline"
-              className="bg-transparent border-primary-foreground/50 text-primary-foreground hover:bg-primary-foreground/10"
-            >
-              Contact Sales
-            </Button>
+            <Link href="/register">
+              <Button size="lg" variant="secondary" className="gap-2">
+                Start Free Trial
+                <ArrowRight className="size-4" />
+              </Button>
+            </Link>
+            <a href="mailto:sales@flow.dev">
+              <Button
+                size="lg"
+                variant="outline"
+                className="bg-transparent border-primary-foreground/50 text-primary-foreground hover:bg-primary-foreground/10"
+              >
+                Contact Sales
+              </Button>
+            </a>
           </div>
         </div>
       </div>
