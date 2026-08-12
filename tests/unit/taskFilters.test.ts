@@ -203,7 +203,9 @@ describe('Task Filtering and Sorting Logic', () => {
     it('should sort tasks by title alphabetically', () => {
       const sort: TaskSortOptions = { field: 'title', order: 'asc' };
       const sorted = [...mockTasks].sort((a, b) => {
-        const comparison = a[sort.field].localeCompare(b[sort.field]);
+        const aValue = a[sort.field];
+        const bValue = b[sort.field];
+        const comparison = (aValue || '').localeCompare(bValue || '');
         return sort.order === 'asc' ? comparison : -comparison;
       });
 
@@ -223,7 +225,9 @@ describe('Task Filtering and Sorting Logic', () => {
       });
 
       filtered = filtered.sort((a, b) => {
-        const comparison = new Date(a[sort.field]).getTime() - new Date(b[sort.field]).getTime();
+        const aValue = a[sort.field];
+        const bValue = b[sort.field];
+        const comparison = new Date(aValue || '').getTime() - new Date(bValue || '').getTime();
         return sort.order === 'asc' ? comparison : -comparison;
       });
 
