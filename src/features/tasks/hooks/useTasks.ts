@@ -8,6 +8,7 @@ import type {
   CommentInsert,
   CommentUpdate,
   TaskActivityInsert,
+  TaskWithDetails,
 } from '../types';
 
 export function useTasks(projectId: string) {
@@ -64,9 +65,28 @@ export function useUpdateTask() {
   return useMutation({
     mutationFn: ({ id, updates }: { id: string; updates: TaskUpdate }) =>
       taskService.updateTask(id, updates),
-    onSuccess: (_, { id }) => {
+    onMutate: async ({ id, updates }) => {
+      await queryClient.cancelQueries({ queryKey: ['tasks'] });
+
+      const previousTasks = queryClient.getQueryData(['tasks']);
+
+      queryClient.setQueryData(['tasks'], (old: TaskWithDetails[] | undefined) => {
+        if (!old) return old;
+        return old.map((task: TaskWithDetails) =>
+          task.id === id ? { ...task, ...updates } : task
+        );
+      });
+
+      return { previousTasks };
+    },
+    onError: (err, variables, context) => {
+      if (context?.previousTasks) {
+        queryClient.setQueryData(['tasks'], context.previousTasks);
+      }
+    },
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ['tasks'] });
-      queryClient.invalidateQueries({ queryKey: ['task', id] });
+      queryClient.invalidateQueries({ queryKey: ['task'] });
     },
   });
 }

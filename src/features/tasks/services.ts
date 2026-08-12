@@ -23,7 +23,7 @@ export const taskService = {
       .from('tasks')
       .select('*')
       .eq('project_id', projectId)
-      .order('created_at', { ascending: false });
+      .order('position', { ascending: true });
 
     if (error) throw error;
     return data as Task[];
@@ -115,8 +115,8 @@ export const taskService = {
       query = query.ilike('title', `%${filters.search}%`);
     }
 
-    const sortField = sort?.field || 'created_at';
-    const sortOrder = sort?.order || 'desc';
+    const sortField = sort?.field || 'position';
+    const sortOrder = sort?.order || 'asc';
     query = query.order(sortField, { ascending: sortOrder === 'asc' });
 
     const { data, error } = await query;
@@ -156,6 +156,22 @@ export const taskService = {
   },
 
   async updateTask(id: string, updates: TaskUpdate) {
+    const { data, error } = await supabase
+      .from('tasks')
+      .update(updates)
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data as Task;
+  },
+
+  async updateTaskPosition(id: string, position: number, status?: string) {
+    const updates: TaskUpdate = { position };
+    if (status) {
+      updates.status = status as TaskUpdate['status'];
+    }
     const { data, error } = await supabase
       .from('tasks')
       .update(updates)

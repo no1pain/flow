@@ -197,4 +197,47 @@ test.describe('Task CRUD Flow', () => {
     // Verify activity section is visible
     await expect(page.locator('text=Activity')).toBeVisible();
   });
+
+  test('should drag task to change status in Kanban board', async ({ page }) => {
+    // Navigate to tasks page with Kanban view
+    await page.goto('/dashboard/projects');
+    await page.click('.grid > div:first-child');
+    await page.click('text=View Tasks');
+
+    // Switch to Kanban view if not already
+    const kanbanButton = page.locator('text=Kanban').first();
+    if (await kanbanButton.isVisible()) {
+      await kanbanButton.click();
+    }
+
+    // Wait for Kanban board to load
+    await page.waitForSelector('[data-testid="kanban-board"]');
+
+    // Get the first task in the TODO column
+    const todoColumn = page.locator('[data-testid="column-TODO"]');
+    const firstTask = todoColumn.locator('[data-testid^="task-card-"]').first();
+
+    // Get the task ID for verification
+    const taskId = await firstTask.getAttribute('data-testid');
+
+    // Drag the task to the IN_PROGRESS column
+    const inProgressColumn = page.locator('[data-testid="column-IN_PROGRESS"]');
+
+    await firstTask.dragTo(inProgressColumn);
+
+    // Wait for the drag operation to complete
+    await page.waitForTimeout(500);
+
+    // Verify the task is now in the IN_PROGRESS column
+    const inProgressTasks = inProgressColumn.locator('[data-testid^="task-card-"]');
+    const taskMoved = await inProgressTasks.filter({ hasText: taskId || '' }).count();
+
+    expect(taskMoved).toBeGreaterThan(0);
+
+    // Verify the task is no longer in the TODO column
+    const todoTasks = todoColumn.locator('[data-testid^="task-card-"]');
+    const taskInTodo = await todoTasks.filter({ hasText: taskId || '' }).count();
+
+    expect(taskInTodo).toBe(0);
+  });
 });

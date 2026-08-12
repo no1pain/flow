@@ -18,6 +18,7 @@ export type TaskActivityAction = TaskActivity['action'];
 export type EntityType = 'task' | 'document';
 
 export interface TaskWithDetails extends Task {
+  position?: number;
   assignee?: {
     id: string;
     username: string;
