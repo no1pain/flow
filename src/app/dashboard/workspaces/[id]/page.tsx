@@ -56,7 +56,7 @@ export default function WorkspaceDetailPage() {
           <div className="flex-1">
             <h1 className="text-3xl font-bold">{workspace.name}</h1>
             <p className="text-slate-600 dark:text-slate-400">
-              Created {new Date(workspace.created_at).toLocaleDateString()}
+              Created {new Date(workspace.created_at || '').toLocaleDateString()}
             </p>
           </div>
           <Button variant="outline">

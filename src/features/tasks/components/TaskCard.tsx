@@ -18,7 +18,7 @@ import {
   ArrowRight,
   MessageSquare,
 } from 'lucide-react';
-import type { TaskWithDetails } from '../types';
+import type { TaskWithDetails, TaskStatus, TaskPriority } from '../types';
 
 interface TaskCardProps {
   task: TaskWithDetails;
@@ -41,8 +41,8 @@ const statusConfig = {
 };
 
 export function TaskCard({ task, onView, onEdit, canEdit = false }: TaskCardProps) {
-  const priority = priorityConfig[task.priority];
-  const status = statusConfig[task.status];
+  const priority = priorityConfig[task.priority as TaskPriority];
+  const status = statusConfig[task.status as TaskStatus];
   const StatusIcon = status.icon;
   const PriorityIcon = priority.icon;
 

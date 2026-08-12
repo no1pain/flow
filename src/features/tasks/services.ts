@@ -168,7 +168,7 @@ export const taskService = {
   },
 
   async updateTaskPosition(id: string, position: number, status?: string) {
-    const updates: TaskUpdate = { position };
+    const updates: TaskUpdate & { position: number } = { position };
     if (status) {
       updates.status = status as TaskUpdate['status'];
     }

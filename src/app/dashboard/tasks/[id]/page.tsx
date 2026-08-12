@@ -5,6 +5,7 @@ import { useTaskWithDetails } from '@/features/tasks/hooks/useTasks';
 import { useComments } from '@/features/tasks/hooks/useTasks';
 import { useTaskActivity } from '@/features/tasks/hooks/useTasks';
 import { deleteTask, createComment, deleteComment } from '@/features/tasks/actions';
+import type { TaskStatus, TaskPriority } from '@/features/tasks/types';
 import { CommentList } from '@/features/tasks/components/CommentList';
 import { TaskActivity } from '@/features/tasks/components/TaskActivity';
 import { Button } from '@/components/ui/button';
@@ -99,8 +100,8 @@ export default function TaskDetailPage() {
     );
   }
 
-  const priority = priorityConfig[task.priority];
-  const status = statusConfig[task.status];
+  const priority = priorityConfig[task.priority as TaskPriority];
+  const status = statusConfig[task.status as TaskStatus];
   const StatusIcon = status.icon;
   const PriorityIcon = priority.icon;
 
@@ -126,7 +127,7 @@ export default function TaskDetailPage() {
               </Badge>
             </div>
             <p className="text-slate-600 dark:text-slate-400">
-              Created {new Date(task.created_at).toLocaleDateString()}
+              Created {new Date(task.created_at || '').toLocaleDateString()}
             </p>
           </div>
           <div className="flex gap-2">
@@ -251,11 +252,15 @@ export default function TaskDetailPage() {
                   )}
                   <div>
                     <p className="text-sm text-slate-600 dark:text-slate-400 mb-1">Created</p>
-                    <p className="font-medium">{new Date(task.created_at).toLocaleString()}</p>
+                    <p className="font-medium">
+                      {new Date(task.created_at || '').toLocaleString()}
+                    </p>
                   </div>
                   <div>
                     <p className="text-sm text-slate-600 dark:text-slate-400 mb-1">Last updated</p>
-                    <p className="font-medium">{new Date(task.updated_at).toLocaleString()}</p>
+                    <p className="font-medium">
+                      {new Date(task.updated_at || '').toLocaleString()}
+                    </p>
                   </div>
                 </div>
               </CardContent>

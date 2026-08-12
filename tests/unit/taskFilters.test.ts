@@ -1,5 +1,11 @@
 import { describe, it, expect } from 'vitest';
-import type { TaskWithDetails, TaskFilters, TaskSortOptions } from '@/features/tasks/types';
+import type {
+  TaskWithDetails,
+  TaskFilters,
+  TaskSortOptions,
+  TaskPriority,
+  TaskStatus,
+} from '@/features/tasks/types';
 
 describe('Task Filtering and Sorting Logic', () => {
   const mockTasks: TaskWithDetails[] = [
@@ -157,7 +163,9 @@ describe('Task Filtering and Sorting Logic', () => {
     it('should sort tasks by created_at descending', () => {
       const sort: TaskSortOptions = { field: 'created_at', order: 'desc' };
       const sorted = [...mockTasks].sort((a, b) => {
-        const comparison = new Date(a[sort.field]).getTime() - new Date(b[sort.field]).getTime();
+        const aValue = a[sort.field];
+        const bValue = b[sort.field];
+        const comparison = new Date(aValue || '').getTime() - new Date(bValue || '').getTime();
         return sort.order === 'asc' ? comparison : -comparison;
       });
 
@@ -168,7 +176,9 @@ describe('Task Filtering and Sorting Logic', () => {
     it('should sort tasks by created_at ascending', () => {
       const sort: TaskSortOptions = { field: 'created_at', order: 'asc' };
       const sorted = [...mockTasks].sort((a, b) => {
-        const comparison = new Date(a[sort.field]).getTime() - new Date(b[sort.field]).getTime();
+        const aValue = a[sort.field];
+        const bValue = b[sort.field];
+        const comparison = new Date(aValue || '').getTime() - new Date(bValue || '').getTime();
         return sort.order === 'asc' ? comparison : -comparison;
       });
 
@@ -177,10 +187,11 @@ describe('Task Filtering and Sorting Logic', () => {
     });
 
     it('should sort tasks by priority', () => {
-      const priorityOrder = { LOW: 0, MEDIUM: 1, HIGH: 2, URGENT: 3 };
+      const priorityOrder: Record<TaskPriority, number> = { LOW: 0, MEDIUM: 1, HIGH: 2, URGENT: 3 };
       const sort: TaskSortOptions = { field: 'priority', order: 'desc' };
       const sorted = [...mockTasks].sort((a, b) => {
-        const comparison = priorityOrder[a.priority] - priorityOrder[b.priority];
+        const comparison =
+          priorityOrder[a.priority as TaskPriority] - priorityOrder[b.priority as TaskPriority];
         return sort.order === 'asc' ? comparison : -comparison;
       });
 
@@ -189,10 +200,11 @@ describe('Task Filtering and Sorting Logic', () => {
     });
 
     it('should sort tasks by status', () => {
-      const statusOrder = { TODO: 0, IN_PROGRESS: 1, DONE: 2 };
+      const statusOrder: Record<TaskStatus, number> = { TODO: 0, IN_PROGRESS: 1, DONE: 2 };
       const sort: TaskSortOptions = { field: 'status', order: 'asc' };
       const sorted = [...mockTasks].sort((a, b) => {
-        const comparison = statusOrder[a.status] - statusOrder[b.status];
+        const comparison =
+          statusOrder[a.status as TaskStatus] - statusOrder[b.status as TaskStatus];
         return sort.order === 'asc' ? comparison : -comparison;
       });
 

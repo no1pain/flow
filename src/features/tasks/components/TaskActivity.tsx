@@ -21,7 +21,7 @@ const actionConfig = {
 };
 
 export function TaskActivity({ activities, loading = false }: TaskActivityProps) {
-  const formatChanges = (changes: Record<string, unknown> | null) => {
+  const formatChanges = (changes: Record<string, unknown> | null | undefined) => {
     if (!changes) return null;
 
     const entries = Object.entries(changes);
@@ -51,7 +51,7 @@ export function TaskActivity({ activities, loading = false }: TaskActivityProps)
   return (
     <div className="space-y-3">
       {activities.map((activity) => {
-        const config = actionConfig[activity.action];
+        const config = actionConfig[activity.action as keyof typeof actionConfig];
         const Icon = config.icon;
 
         return (
@@ -73,7 +73,7 @@ export function TaskActivity({ activities, loading = false }: TaskActivityProps)
               </div>
               {activity.changes && (
                 <div className="pl-6 space-y-1 text-muted-foreground">
-                  {formatChanges(activity.changes)}
+                  {formatChanges(activity.changes as Record<string, unknown> | null)}
                 </div>
               )}
             </div>

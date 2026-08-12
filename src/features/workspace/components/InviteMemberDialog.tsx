@@ -16,6 +16,7 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { UserPlus } from 'lucide-react';
 import { useCreateInvitation } from '../hooks/useWorkspaceInvitations';
+import { useAuth } from '@/features/auth/hooks/useAuth';
 
 interface InviteMemberDialogProps {
   workspaceId: string;
@@ -33,6 +34,7 @@ export function InviteMemberDialog({ workspaceId, trigger }: InviteMemberDialogP
   const [email, setEmail] = useState('');
   const [role, setRole] = useState<'ADMIN' | 'MEMBER' | 'GUEST'>('MEMBER');
   const createInvitation = useCreateInvitation();
+  const { user } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -43,6 +45,7 @@ export function InviteMemberDialog({ workspaceId, trigger }: InviteMemberDialogP
         workspace_id: workspaceId,
         email,
         role,
+        invited_by: user?.id || '',
       });
       setEmail('');
       setRole('MEMBER');
