@@ -64,9 +64,7 @@ export function ShareDialog({ document, onShare, open, onOpenChange }: ShareDial
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Share document</DialogTitle>
-          <DialogDescription>
-            Share "{document.title}" with others
-          </DialogDescription>
+          <DialogDescription>Share &ldquo;{document.title}&rdquo; with others</DialogDescription>
         </DialogHeader>
         <div className="space-y-4 py-4">
           <div className="flex items-center gap-2">

@@ -1,6 +1,6 @@
 'use client';
 
-import { File, Folder, MoreVertical, Trash2, Share2 } from 'lucide-react';
+import { File, MoreVertical, Trash2, Share2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -49,9 +49,7 @@ export function DocumentList({
             </p>
           </div>
           {document.is_public && (
-            <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded">
-              Public
-            </span>
+            <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded">Public</span>
           )}
           <DropdownMenu>
             <DropdownMenuTrigger onClick={(e) => e.stopPropagation()}>
@@ -61,14 +59,22 @@ export function DocumentList({
             </DropdownMenuTrigger>
             <DropdownMenuContent>
               {onShareDocument && (
-                <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onShareDocument(document); }}>
+                <DropdownMenuItem
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onShareDocument(document);
+                  }}
+                >
                   <Share2 className="h-4 w-4 mr-2" />
                   Share
                 </DropdownMenuItem>
               )}
               {onDeleteDocument && (
                 <DropdownMenuItem
-                  onClick={(e) => { e.stopPropagation(); onDeleteDocument(document.id); }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onDeleteDocument(document.id);
+                  }}
                   className="text-destructive"
                 >
                   <Trash2 className="h-4 w-4 mr-2" />

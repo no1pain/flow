@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { documentService } from './services';
-import type { Document, DocumentInsert, DocumentUpdate } from './types';
+import type { DocumentInsert, DocumentUpdate } from './types';
 
 export function useDocuments(workspaceId: string, parentId?: string | null) {
   return useQuery({
@@ -28,8 +28,7 @@ export function useCreateDocument() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (document: DocumentInsert) =>
-      documentService.createDocument(document),
+    mutationFn: (document: DocumentInsert) => documentService.createDocument(document),
     onSuccess: (data) => {
       queryClient.invalidateQueries({
         queryKey: ['documents', data.workspace_id],

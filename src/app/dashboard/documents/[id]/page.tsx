@@ -10,7 +10,7 @@ import { DocumentEditor } from '@/features/documents/components/DocumentEditor';
 import { ShareDialog } from '@/features/documents/components/ShareDialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { ArrowLeft, Save, Trash2, Share2, Loader2 } from 'lucide-react';
+import { ArrowLeft, Save, Trash2, Loader2 } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 
 export default function DocumentDetailPage() {
@@ -91,10 +91,7 @@ export default function DocumentDetailPage() {
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 p-8">
       <div className="max-w-4xl mx-auto">
         <div className="flex justify-between items-center mb-6">
-          <Button
-            variant="ghost"
-            onClick={() => router.push('/dashboard/documents')}
-          >
+          <Button variant="ghost" onClick={() => router.push('/dashboard/documents')}>
             <ArrowLeft className="size-4 mr-2" />
             Back to Documents
           </Button>
@@ -105,18 +102,11 @@ export default function DocumentDetailPage() {
               open={showShareDialog}
               onOpenChange={setShowShareDialog}
             />
-            <Button
-              variant="outline"
-              onClick={handleDelete}
-              className="text-destructive"
-            >
+            <Button variant="outline" onClick={handleDelete} className="text-destructive">
               <Trash2 className="h-4 w-4 mr-2" />
               Delete
             </Button>
-            <Button
-              onClick={handleSave}
-              disabled={!hasUnsavedChanges || updateDocument.isPending}
-            >
+            <Button onClick={handleSave} disabled={!hasUnsavedChanges || updateDocument.isPending}>
               {updateDocument.isPending ? (
                 <Loader2 className="h-4 w-4 mr-2 animate-spin" />
               ) : (
@@ -140,9 +130,7 @@ export default function DocumentDetailPage() {
           <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
             <span>Created {new Date(document.created_at).toLocaleDateString()}</span>
             {document.is_public && (
-              <span className="bg-primary/10 text-primary px-2 py-1 rounded text-xs">
-                Public
-              </span>
+              <span className="bg-primary/10 text-primary px-2 py-1 rounded text-xs">Public</span>
             )}
           </div>
         </div>

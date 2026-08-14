@@ -12,7 +12,14 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ArrowLeft, Plus, Search, File, FolderPlus } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import {
+  Dialog,
+  DialogTrigger,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 
 export default function DocumentsPage() {
@@ -24,10 +31,11 @@ export default function DocumentsPage() {
   const [newDocTitle, setNewDocTitle] = useState('');
   const [isCreatingFolder, setIsCreatingFolder] = useState(false);
 
-  const { data: documents, isLoading, error } = useDocuments(
-    currentWorkspace?.id || '',
-    selectedFolderId
-  );
+  const {
+    data: documents,
+    isLoading,
+    error,
+  } = useDocuments(currentWorkspace?.id || '', selectedFolderId);
   const { data: folders } = useFolderStructure(currentWorkspace?.id || '');
   const createDocument = useCreateDocument();
 
@@ -49,7 +57,7 @@ export default function DocumentsPage() {
     setIsCreatingFolder(false);
   };
 
-  const handleDocumentClick = (document: any) => {
+  const handleDocumentClick = (document: { id: string }) => {
     router.push(`/dashboard/documents/${document.id}`);
   };
 
@@ -183,7 +191,7 @@ export default function DocumentsPage() {
             <FolderTree
               folders={folders || []}
               onFolderClick={setSelectedFolderId}
-              onDocumentClick={handleDocumentClick}
+              onDocumentClick={(documentId) => router.push(`/dashboard/documents/${documentId}`)}
               selectedFolderId={selectedFolderId}
             />
           </div>
@@ -191,10 +199,7 @@ export default function DocumentsPage() {
             <h2 className="font-semibold mb-4">
               {selectedFolderId ? 'Documents in folder' : 'All documents'}
             </h2>
-            <DocumentList
-              documents={documents || []}
-              onDocumentClick={handleDocumentClick}
-            />
+            <DocumentList documents={documents || []} onDocumentClick={handleDocumentClick} />
           </div>
         </div>
       </div>

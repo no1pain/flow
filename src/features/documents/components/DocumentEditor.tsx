@@ -4,9 +4,40 @@ import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Placeholder from '@tiptap/extension-placeholder';
 import Link from '@tiptap/extension-link';
-import { Bold, Italic, List, ListOrdered, Heading1, Heading2, Link as LinkIcon, Undo, Redo } from 'lucide-react';
+import {
+  Bold,
+  Italic,
+  List,
+  ListOrdered,
+  Heading1,
+  Heading2,
+  Link as LinkIcon,
+  Undo,
+  Redo,
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+
+interface ToolbarButtonProps {
+  onClick: () => void;
+  active?: boolean;
+  children: React.ReactNode;
+  editable?: boolean;
+}
+
+function ToolbarButton({ onClick, active, children, editable = true }: ToolbarButtonProps) {
+  return (
+    <Button
+      variant="ghost"
+      size="sm"
+      onClick={onClick}
+      className={cn(active && 'bg-accent')}
+      disabled={!editable}
+    >
+      {children}
+    </Button>
+  );
+}
 
 interface DocumentEditorProps {
   content: Record<string, unknown> | null;
@@ -41,7 +72,8 @@ export function DocumentEditor({
     },
     editorProps: {
       attributes: {
-        class: 'prose prose-sm sm:prose lg:prose-lg dark:prose-invert max-w-none focus:outline-none min-h-[400px] px-4 py-2',
+        class:
+          'prose prose-sm sm:prose lg:prose-lg dark:prose-invert max-w-none focus:outline-none min-h-[400px] px-4 py-2',
       },
     },
   });
@@ -49,26 +81,6 @@ export function DocumentEditor({
   if (!editor) {
     return null;
   }
-
-  const ToolbarButton = ({
-    onClick,
-    active,
-    children,
-  }: {
-    onClick: () => void;
-    active?: boolean;
-    children: React.ReactNode;
-  }) => (
-    <Button
-      variant="ghost"
-      size="sm"
-      onClick={onClick}
-      className={cn(active && 'bg-accent')}
-      disabled={!editable}
-    >
-      {children}
-    </Button>
-  );
 
   return (
     <div className="border rounded-lg overflow-hidden">

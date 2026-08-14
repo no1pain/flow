@@ -12,7 +12,7 @@ const supabase = createClient();
 
 export const documentService = {
   async getDocumentsByWorkspace(workspaceId: string, parentId?: string | null) {
-    let query = supabase
+    const query = supabase
       .from('documents')
       .select('*')
       .eq('workspace_id', workspaceId)
@@ -45,7 +45,8 @@ export const documentService = {
 
     return {
       ...data,
-      creator: (data as any).creator,
+      creator: (data as { creator?: { id: string; username: string; avatar_url: string | null } })
+        .creator,
     } as DocumentWithProfile;
   },
 
@@ -102,11 +103,7 @@ export const documentService = {
   },
 
   async createDocument(document: DocumentInsert) {
-    const { data, error } = await supabase
-      .from('documents')
-      .insert(document)
-      .select()
-      .single();
+    const { data, error } = await supabase.from('documents').insert(document).select().single();
 
     if (error) throw error;
     return data as Document;
@@ -142,10 +139,7 @@ export const documentService = {
     return data as Document;
   },
 
-  async searchDocuments(
-    workspaceId: string,
-    query: string
-  ): Promise<DocumentSearchResult[]> {
+  async searchDocuments(workspaceId: string, query: string): Promise<DocumentSearchResult[]> {
     const { data, error } = await supabase
       .from('documents')
       .select('*')
