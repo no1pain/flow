@@ -20,7 +20,7 @@ export default function ProjectsPage() {
 
   if (!currentWorkspace) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 p-8">
+      <div className="min-h-screen bg-background p-8">
         <div className="max-w-6xl mx-auto">
           <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4">
             <p className="text-yellow-800 dark:text-yellow-200">Please select a workspace first</p>
@@ -39,7 +39,7 @@ export default function ProjectsPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 p-8">
+      <div className="min-h-screen bg-background p-8">
         <div className="max-w-6xl mx-auto">
           <div className="flex justify-between items-center mb-8">
             <div>
@@ -68,7 +68,7 @@ export default function ProjectsPage() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 p-8">
+      <div className="min-h-screen bg-background p-8">
         <div className="max-w-6xl mx-auto">
           <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
             <p className="text-red-800 dark:text-red-200">Failed to load projects</p>
@@ -79,7 +79,7 @@ export default function ProjectsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 p-8">
+    <div className="min-h-screen bg-background p-8">
       <div className="max-w-6xl mx-auto">
         <div className="flex justify-between items-center mb-8">
           <div>

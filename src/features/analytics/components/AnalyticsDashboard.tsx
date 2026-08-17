@@ -202,7 +202,7 @@ export function AnalyticsDashboard({ workspaceId }: { workspaceId: string }) {
           value={timeRange}
           onValueChange={(value: '7d' | '30d' | '90d') => setTimeRange(value)}
         >
-          <SelectTrigger className="w-[140px]">
+          <SelectTrigger className="w-35">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>

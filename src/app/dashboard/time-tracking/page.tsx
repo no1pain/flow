@@ -16,7 +16,7 @@ export default function TimeTrackingPage() {
 
   if (!currentWorkspace) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 p-8">
+      <div className="min-h-screen bg-background p-8">
         <div className="max-w-6xl mx-auto">
           <div className="bg-white dark:bg-slate-800 rounded-lg shadow-lg p-8">
             <h2 className="text-xl font-semibold mb-4">No workspace selected</h2>
@@ -30,7 +30,7 @@ export default function TimeTrackingPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 p-8">
+    <div className="min-h-screen bg-background p-8">
       <div className="max-w-6xl mx-auto space-y-6">
         <div className="flex items-center justify-between">
           <h1 className="text-3xl font-bold">Time Tracking</h1>

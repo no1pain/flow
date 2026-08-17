@@ -41,7 +41,7 @@ export default function ProjectDetailPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 p-8">
+      <div className="min-h-screen bg-background p-8">
         <div className="max-w-6xl mx-auto">
           <Skeleton className="h-12 w-48 mb-6" />
           <Skeleton className="h-64 rounded-xl" />
@@ -52,7 +52,7 @@ export default function ProjectDetailPage() {
 
   if (error || !project) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 p-8">
+      <div className="min-h-screen bg-background p-8">
         <div className="max-w-6xl mx-auto">
           <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
             <p className="text-red-800 dark:text-red-200">Project not found</p>
@@ -65,7 +65,7 @@ export default function ProjectDetailPage() {
   const isActive = project.status === 'ACTIVE';
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 p-8">
+    <div className="min-h-screen bg-background p-8">
       <div className="max-w-6xl mx-auto">
         <div className="flex items-center gap-4 mb-8">
           <Button variant="ghost" size="icon" onClick={() => router.push('/dashboard/projects')}>

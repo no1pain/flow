@@ -17,22 +17,23 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import {
-  LayoutDashboard,
-  FolderKanban,
-  CheckSquare,
-  FileText,
-  BarChart3,
-  Settings,
-  LogOut,
-  Clock,
-} from 'lucide-react';
+import { Menu } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+
+const navItems = [
+  { label: 'Workspaces', href: '/dashboard/workspaces' },
+  { label: 'Projects', href: '/dashboard/projects' },
+  { label: 'Tasks', href: '/dashboard/tasks' },
+  { label: 'Documents', href: '/dashboard/documents' },
+  { label: 'Analytics', href: '/dashboard/analytics' },
+  { label: 'Time', href: '/dashboard/time-tracking' },
+];
 
 export function DashboardHeader() {
   const { user, logout } = useAuth();
   const currentWorkspace = useWorkspaceStore((state) => state.currentWorkspace);
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const router = useRouter();
 
   const handleLogout = async () => {
@@ -40,81 +41,44 @@ export function DashboardHeader() {
     router.push('/login');
   };
 
+  const handleNavigate = (href: string) => {
+    setMobileMenuOpen(false);
+    router.push(href);
+  };
+
   return (
     <>
       <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container flex h-16 items-center justify-between">
-          <div className="flex items-center gap-6">
-            <div className="flex items-center gap-2">
-              <span className="text-xl font-bold">Flow</span>
+        <div className="container flex h-16 items-center justify-between gap-4">
+          <div className="flex items-center gap-4 min-w-0">
+            <div className="flex items-center gap-2 min-w-0">
+              <span className="text-xl font-bold shrink-0">Flow</span>
               {currentWorkspace && (
-                <span className="text-sm text-muted-foreground">/ {currentWorkspace.name}</span>
+                <span className="text-sm text-muted-foreground truncate">
+                  / {currentWorkspace.name}
+                </span>
               )}
             </div>
 
-            <nav className="hidden md:flex items-center gap-1">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => router.push('/dashboard/workspaces')}
-                className="gap-2"
-              >
-                <LayoutDashboard className="h-4 w-4" />
-                Workspaces
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => router.push('/dashboard/projects')}
-                className="gap-2"
-              >
-                <FolderKanban className="h-4 w-4" />
-                Projects
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => router.push('/dashboard/projects')}
-                className="gap-2"
-              >
-                <CheckSquare className="h-4 w-4" />
-                Tasks
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => router.push('/dashboard/documents')}
-                className="gap-2"
-              >
-                <FileText className="h-4 w-4" />
-                Documents
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => router.push('/dashboard/analytics')}
-                className="gap-2"
-              >
-                <BarChart3 className="h-4 w-4" />
-                Analytics
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => router.push('/dashboard/time-tracking')}
-                className="gap-2"
-              >
-                <Clock className="h-4 w-4" />
-                Time
-              </Button>
+            <nav className="hidden lg:flex items-center gap-1">
+              {navItems.map((item) => (
+                <Button
+                  key={item.label}
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => router.push(item.href)}
+                >
+                  {item.label}
+                </Button>
+              ))}
             </nav>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1 sm:gap-2 shrink-0">
             <Button
               variant="ghost"
               size="sm"
-              className="hidden md:flex"
+              className="hidden lg:flex"
               onClick={() => setCommandPaletteOpen(true)}
             >
               <span className="text-muted-foreground">Search</span>
@@ -161,13 +125,37 @@ export function DashboardHeader() {
                   onClick={() => router.push('/dashboard/settings')}
                   className="gap-2"
                 >
-                  <Settings className="h-4 w-4" />
                   Settings
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleLogout} className="gap-2 text-destructive">
-                  <LogOut className="h-4 w-4" />
                   Log out
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+
+            {/* Mobile navigation menu */}
+            <DropdownMenu open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
+              <DropdownMenuTrigger>
+                <Button variant="ghost" size="icon" className="lg:hidden">
+                  <Menu className="h-5 w-5" />
+                  <span className="sr-only">Open menu</span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-56">
+                {navItems.map((item) => (
+                  <DropdownMenuItem key={item.label} onClick={() => handleNavigate(item.href)}>
+                    {item.label}
+                  </DropdownMenuItem>
+                ))}
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    setCommandPaletteOpen(true);
+                  }}
+                >
+                  Search
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
