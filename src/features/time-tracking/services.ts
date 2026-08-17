@@ -167,14 +167,20 @@ export const timeTrackingService = {
     return supabase
       .channel(`time_entries:${userId}:${workspaceId}`)
       .on(
-        'postgres_changes' as const,
+        'postgres_changes',
         {
           event: '*',
           schema: 'public',
           table: 'time_entries',
           filter: `user_id=eq.${userId}`,
         },
-        callback
+        (payload) => {
+          callback({
+            eventType: payload.eventType,
+            new: payload.new as TimeEntry | undefined,
+            old: payload.old as TimeEntry | undefined,
+          });
+        }
       )
       .subscribe();
   },

@@ -27,6 +27,7 @@ import {
 } from 'recharts';
 import { taskService } from '@/features/tasks/services';
 import { projectService } from '@/features/projects/services';
+import type { Task } from '@/features/tasks/types';
 import { format, subDays, startOfDay } from 'date-fns';
 
 interface AnalyticsData {
@@ -98,12 +99,12 @@ export function AnalyticsDashboard({ workspaceId }: { workspaceId: string }) {
         const dateStr = format(date, 'MMM dd');
 
         const created = tasks.filter(
-          (task: { created_at?: string }) =>
+          (task: Task) =>
             task.created_at && startOfDay(new Date(task.created_at)).getTime() === date.getTime()
         ).length;
 
         const completed = tasks.filter(
-          (task: { status: string; updated_at?: string }) =>
+          (task: Task) =>
             task.status === 'DONE' &&
             task.updated_at &&
             startOfDay(new Date(task.updated_at)).getTime() === date.getTime()
@@ -114,12 +115,8 @@ export function AnalyticsDashboard({ workspaceId }: { workspaceId: string }) {
 
       // Project progress
       const projectProgress = projects.map((project: { id: string; name: string }) => {
-        const projectTasks = tasks.filter(
-          (task: { project_id?: string; status: string }) => task.project_id === project.id
-        );
-        const completed = projectTasks.filter(
-          (task: { status: string }) => task.status === 'DONE'
-        ).length;
+        const projectTasks = tasks.filter((task: Task) => task.project_id === project.id);
+        const completed = projectTasks.filter((task: Task) => task.status === 'DONE').length;
         const total = projectTasks.length;
         const percentage = total > 0 ? Math.round((completed / total) * 100) : 0;
 
@@ -134,10 +131,7 @@ export function AnalyticsDashboard({ workspaceId }: { workspaceId: string }) {
       // Team performance
       const teamPerformance = Object.entries(
         tasks.reduce(
-          (
-            acc: Record<string, { assigned: number; completed: number }>,
-            task: { assignee_id?: string; status: string }
-          ) => {
+          (acc: Record<string, { assigned: number; completed: number }>, task: Task) => {
             if (task.assignee_id) {
               if (!acc[task.assignee_id]) {
                 acc[task.assignee_id] = { assigned: 0, completed: 0 };
@@ -153,16 +147,9 @@ export function AnalyticsDashboard({ workspaceId }: { workspaceId: string }) {
         )
       ).map(([name, stats]) => ({
         name,
-        completed: (stats as { assigned: number; completed: number }).completed,
-        assigned: (stats as { assigned: number; completed: number }).assigned,
-        percentage:
-          (stats as { assigned: number; completed: number }).assigned > 0
-            ? Math.round(
-                ((stats as { assigned: number; completed: number }).completed /
-                  (stats as { assigned: number; completed: number }).assigned) *
-                  100
-              )
-            : 0,
+        completed: stats.completed,
+        assigned: stats.assigned,
+        percentage: stats.assigned > 0 ? Math.round((stats.completed / stats.assigned) * 100) : 0,
       }));
 
       return {

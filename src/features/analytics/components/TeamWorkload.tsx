@@ -9,6 +9,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { taskService } from '@/features/tasks/services';
 import { workspaceService } from '@/features/workspace/services';
 import { projectService } from '@/features/projects/services';
+import type { Task } from '@/features/tasks/types';
 
 interface TeamMemberWorkload {
   memberId: string;
@@ -66,55 +67,47 @@ export function TeamWorkload({ workspaceId }: TeamWorkloadProps) {
 
       // Calculate workload from tasks
       const now = new Date();
-      tasks.forEach(
-        (task: {
-          assignee_id?: string;
-          status: string;
-          priority: string;
-          due_date?: string;
-          project_id?: string;
-        }) => {
-          if (task.assignee_id && memberWorkloadMap.has(task.assignee_id)) {
-            const memberWorkload = memberWorkloadMap.get(task.assignee_id)!;
-            memberWorkload.totalTasks++;
+      tasks.forEach((task: Task & { due_date?: string | null }) => {
+        if (task.assignee_id && memberWorkloadMap.has(task.assignee_id)) {
+          const memberWorkload = memberWorkloadMap.get(task.assignee_id)!;
+          memberWorkload.totalTasks++;
 
-            if (task.status === 'DONE') {
-              memberWorkload.completedTasks++;
-            } else if (task.status === 'IN_PROGRESS') {
-              memberWorkload.inProgressTasks++;
-            }
+          if (task.status === 'DONE') {
+            memberWorkload.completedTasks++;
+          } else if (task.status === 'IN_PROGRESS') {
+            memberWorkload.inProgressTasks++;
+          }
 
-            if (task.priority === 'HIGH' || task.priority === 'URGENT') {
-              memberWorkload.highPriorityTasks++;
-            }
+          if (task.priority === 'HIGH' || task.priority === 'URGENT') {
+            memberWorkload.highPriorityTasks++;
+          }
 
-            if (task.due_date && new Date(task.due_date) < now && task.status !== 'DONE') {
-              memberWorkload.overdueTasks++;
-            }
+          if (task.due_date && new Date(task.due_date) < now && task.status !== 'DONE') {
+            memberWorkload.overdueTasks++;
+          }
 
-            // Track project distribution
-            if (task.project_id) {
-              const project = projects.find(
-                (p: { id: string; name: string }) => p.id === task.project_id
+          // Track project distribution
+          if (task.project_id) {
+            const project = projects.find(
+              (p: { id: string; name: string }) => p.id === task.project_id
+            );
+            if (project) {
+              const existingProject = memberWorkload.projects.find(
+                (p) => p.projectId === project.id
               );
-              if (project) {
-                const existingProject = memberWorkload.projects.find(
-                  (p) => p.projectId === project.id
-                );
-                if (existingProject) {
-                  existingProject.taskCount++;
-                } else {
-                  memberWorkload.projects.push({
-                    projectId: project.id,
-                    projectName: project.name,
-                    taskCount: 1,
-                  });
-                }
+              if (existingProject) {
+                existingProject.taskCount++;
+              } else {
+                memberWorkload.projects.push({
+                  projectId: project.id,
+                  projectName: project.name,
+                  taskCount: 1,
+                });
               }
             }
           }
         }
-      );
+      });
 
       // Calculate workload percentage (based on active tasks)
       const maxTasks = Math.max(
