@@ -1,8 +1,5 @@
 import { createClient } from '@/lib/supabase/client';
-import type {
-  Notification,
-  NotificationCount,
-} from './types';
+import type { Notification, NotificationCount } from './types';
 
 const supabase = createClient();
 
@@ -73,10 +70,7 @@ export const notificationService = {
   },
 
   async deleteNotification(notificationId: string): Promise<void> {
-    const { error } = await supabase
-      .from('notifications')
-      .delete()
-      .eq('id', notificationId);
+    const { error } = await supabase.from('notifications').delete().eq('id', notificationId);
 
     if (error) throw error;
   },
@@ -91,9 +85,19 @@ export const notificationService = {
     if (error) throw error;
   },
 
+  async clearNotifications(userId: string): Promise<void> {
+    const { error } = await supabase.from('notifications').delete().eq('user_id', userId);
+
+    if (error) throw error;
+  },
+
   subscribeToNotifications(
     userId: string,
-    callback: (payload: { eventType: string; new: Notification | null; old: Notification | null }) => void
+    callback: (payload: {
+      eventType: string;
+      new: Notification | null;
+      old: Notification | null;
+    }) => void
   ) {
     return supabase
       .channel(`notifications:${userId}`)

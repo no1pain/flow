@@ -5,7 +5,7 @@ import { createClient } from '@/lib/supabase/client';
 import { useAuthStore } from '../store';
 
 export function useAuth() {
-  const { user, setUser } = useAuthStore();
+  const { user, setUser, logout } = useAuthStore();
 
   useEffect(() => {
     const supabase = createClient();
@@ -23,5 +23,5 @@ export function useAuth() {
     return () => subscription.unsubscribe();
   }, [setUser]);
 
-  return { user };
+  return { user, logout };
 }

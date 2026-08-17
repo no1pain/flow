@@ -13,6 +13,17 @@ import type {
 const supabase = createClient();
 
 export const projectService = {
+  async getProjects(workspaceId: string) {
+    const { data, error } = await supabase
+      .from('projects')
+      .select('*')
+      .eq('workspace_id', workspaceId)
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+    return data as Project[];
+  },
+
   async getProjectsByWorkspace(workspaceId: string) {
     const { data, error } = await supabase
       .from('projects')

@@ -147,28 +147,19 @@ BEGIN
     END IF;
     RETURN NEW;
   ELSIF TG_OP = 'UPDATE' THEN
-    IF OLD.assignee_id IS NULL AND NEW.assignee_id IS NOT NULL THEN
-      INSERT INTO notifications (user_id, type, title, message, entity_type, entity_id, metadata)
-      VALUES (
-        NEW.assignee_id,
-        'task_assigned',
-        'Task assigned to you',
-        'You have been assigned a new task',
-        'task',
-        NEW.id,
-        jsonb_build_object('task_id', NEW.id, 'assigner_id', auth.uid())
-      );
-    ELSIF OLD.assignee_id IS NOT NULL AND NEW.assignee_id IS NOT NULL AND OLD.assignee_id != NEW.assignee_id THEN
-      INSERT INTO notifications (user_id, type, title, message, entity_type, entity_id, metadata)
-      VALUES (
-        NEW.assignee_id,
-        'task_assigned',
-        'Task reassigned to you',
-        'A task has been reassigned to you',
-        'task',
-        NEW.id,
-        jsonb_build_object('task_id', NEW.id, 'assigner_id', auth.uid())
-      );
+    IF NEW.assignee_id IS DISTINCT FROM OLD.assignee_id THEN
+      IF NEW.assignee_id IS NOT NULL THEN
+        INSERT INTO notifications (user_id, type, title, message, entity_type, entity_id, metadata)
+        VALUES (
+          NEW.assignee_id,
+          'task_assigned',
+          CASE WHEN OLD.assignee_id IS NULL THEN 'Task assigned to you' ELSE 'Task reassigned to you' END,
+          CASE WHEN OLD.assignee_id IS NULL THEN 'You have been assigned a new task' ELSE 'A task has been reassigned to you' END,
+          'task',
+          NEW.id,
+          jsonb_build_object('task_id', NEW.id, 'assigner_id', auth.uid())
+        );
+      END IF;
     END IF;
     RETURN NEW;
   END IF;
@@ -179,36 +170,37 @@ $$ LANGUAGE plpgsql;
 -- Trigger to create notification on task assignment
 CREATE TRIGGER trigger_task_assignment_notification
   AFTER INSERT OR UPDATE ON tasks
-  FOR EACH ROW WHEN (NEW.assignee_id IS DISTINCT FROM OLD.assignee_id OR NULLIF(OLD.assignee_id, NEW.assignee_id) IS NOT NULL)
-  EXECUTE FUNCTION create_task_assignment_notification();
+  FOR EACH ROW EXECUTE FUNCTION create_task_assignment_notification();
 
 -- Function to create notification on task status change
 CREATE OR REPLACE FUNCTION create_task_status_notification()
 RETURNS TRIGGER AS $$
 BEGIN
-  IF NEW.status != OLD.status THEN
-    INSERT INTO notifications (user_id, type, title, message, entity_type, entity_id, metadata)
-    VALUES (
-      NEW.created_by,
-      'task_status_changed',
-      'Task status changed',
-      'The status of your task has been changed',
-      'task',
-      NEW.id,
-      jsonb_build_object('task_id', NEW.id, 'old_status', OLD.status, 'new_status', NEW.status, 'changed_by', auth.uid())
-    );
-    
-    IF NEW.assignee_id IS NOT NULL AND NEW.assignee_id != NEW.created_by THEN
+  IF TG_OP = 'UPDATE' THEN
+    IF NEW.status IS DISTINCT FROM OLD.status THEN
       INSERT INTO notifications (user_id, type, title, message, entity_type, entity_id, metadata)
       VALUES (
-        NEW.assignee_id,
+        NEW.created_by,
         'task_status_changed',
         'Task status changed',
-        'The status of a task assigned to you has been changed',
+        'The status of your task has been changed',
         'task',
         NEW.id,
         jsonb_build_object('task_id', NEW.id, 'old_status', OLD.status, 'new_status', NEW.status, 'changed_by', auth.uid())
       );
+      
+      IF NEW.assignee_id IS NOT NULL AND NEW.assignee_id != NEW.created_by THEN
+        INSERT INTO notifications (user_id, type, title, message, entity_type, entity_id, metadata)
+        VALUES (
+          NEW.assignee_id,
+          'task_status_changed',
+          'Task status changed',
+          'The status of a task assigned to you has been changed',
+          'task',
+          NEW.id,
+          jsonb_build_object('task_id', NEW.id, 'old_status', OLD.status, 'new_status', NEW.status, 'changed_by', auth.uid())
+        );
+      END IF;
     END IF;
   END IF;
   RETURN NEW;
@@ -218,5 +210,4 @@ $$ LANGUAGE plpgsql;
 -- Trigger to create notification on task status change
 CREATE TRIGGER trigger_task_status_notification
   AFTER UPDATE ON tasks
-  FOR EACH ROW WHEN (NEW.status IS DISTINCT FROM OLD.status)
-  EXECUTE FUNCTION create_task_status_notification();
+  FOR EACH ROW EXECUTE FUNCTION create_task_status_notification();

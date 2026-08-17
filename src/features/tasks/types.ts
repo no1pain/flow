@@ -17,8 +17,8 @@ export type TaskActivityAction = TaskActivity['action'];
 
 export type EntityType = 'task' | 'document';
 
-export interface TaskWithDetails extends Task {
-  position?: number;
+export interface TaskWithDetails extends Omit<Task, 'position'> {
+  position?: number | null;
   assignee?: {
     id: string;
     username: string;

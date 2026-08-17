@@ -18,6 +18,17 @@ import type {
 const supabase = createClient();
 
 export const taskService = {
+  async getTasksByWorkspace(workspaceId: string) {
+    const { data, error } = await supabase
+      .from('tasks')
+      .select('*')
+      .eq('workspace_id', workspaceId)
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+    return data as Task[];
+  },
+
   async getTasksByProject(projectId: string) {
     const { data, error } = await supabase
       .from('tasks')
