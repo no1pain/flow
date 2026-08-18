@@ -17,16 +17,17 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Menu } from 'lucide-react';
+import { Menu, Search, X } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { cn } from '@/lib/utils';
 
 const navItems = [
-  { label: 'Workspaces', href: '/dashboard/workspaces' },
-  { label: 'Projects', href: '/dashboard/projects' },
-  { label: 'Tasks', href: '/dashboard/tasks' },
-  { label: 'Documents', href: '/dashboard/documents' },
-  { label: 'Analytics', href: '/dashboard/analytics' },
-  { label: 'Time', href: '/dashboard/time-tracking' },
+  { label: 'Workspaces', href: '/dashboard/workspaces', icon: '🏢' },
+  { label: 'Projects', href: '/dashboard/projects', icon: '📁' },
+  { label: 'Tasks', href: '/dashboard/tasks', icon: '✅' },
+  { label: 'Documents', href: '/dashboard/documents', icon: '📄' },
+  { label: 'Analytics', href: '/dashboard/analytics', icon: '📊' },
+  { label: 'Time', href: '/dashboard/time-tracking', icon: '⏱️' },
 ];
 
 export function DashboardHeader() {
@@ -48,26 +49,30 @@ export function DashboardHeader() {
 
   return (
     <>
-      <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container flex h-16 items-center justify-between gap-4">
+      <header className="border-b align-center bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+        <div className="flex h-16 items-center justify-between gap-4 px-4 sm:px-6 lg:px-8 w-full">
           <div className="flex items-center gap-4 min-w-0">
             <div className="flex items-center gap-2 min-w-0">
-              <span className="text-xl font-bold shrink-0">Flow</span>
+              <span className="text-xl font-bold shrink-0 bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+                Flow
+              </span>
               {currentWorkspace && (
-                <span className="text-sm text-muted-foreground truncate">
+                <span className="text-sm text-muted-foreground truncate hidden sm:block">
                   / {currentWorkspace.name}
                 </span>
               )}
             </div>
 
-            <nav className="hidden lg:flex items-center gap-1">
+            <nav className="hidden md:flex items-center gap-1">
               {navItems.map((item) => (
                 <Button
                   key={item.label}
                   variant="ghost"
                   size="sm"
                   onClick={() => router.push(item.href)}
+                  className="gap-1.5"
                 >
+                  <span className="hidden lg:inline">{item.icon}</span>
                   {item.label}
                 </Button>
               ))}
@@ -78,11 +83,12 @@ export function DashboardHeader() {
             <Button
               variant="ghost"
               size="sm"
-              className="hidden lg:flex"
+              className="hidden md:flex gap-2"
               onClick={() => setCommandPaletteOpen(true)}
             >
-              <span className="text-muted-foreground">Search</span>
-              <kbd className="pointer-events-none ml-2 inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium opacity-100">
+              <Search className="h-4 w-4" />
+              <span className="text-muted-foreground hidden lg:inline">Search</span>
+              <kbd className="pointer-events-none ml-auto inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium opacity-100">
                 <span className="text-xs">⌘</span>K
               </kbd>
             </Button>
@@ -94,7 +100,7 @@ export function DashboardHeader() {
 
             <DropdownMenu>
               <DropdownMenuTrigger>
-                <Button variant="ghost" size="icon" className="relative">
+                <Button variant="ghost" size="icon" className="relative h-9 w-9">
                   <Avatar className="h-8 w-8">
                     {user?.user_metadata?.avatar_url ? (
                       // eslint-disable-next-line @next/next/no-img-element
@@ -137,14 +143,19 @@ export function DashboardHeader() {
             {/* Mobile navigation menu */}
             <DropdownMenu open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
               <DropdownMenuTrigger>
-                <Button variant="ghost" size="icon" className="lg:hidden">
-                  <Menu className="h-5 w-5" />
-                  <span className="sr-only">Open menu</span>
+                <Button variant="ghost" size="icon" className="md:hidden h-9 w-9">
+                  {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+                  <span className="sr-only">Toggle menu</span>
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent className="w-56">
                 {navItems.map((item) => (
-                  <DropdownMenuItem key={item.label} onClick={() => handleNavigate(item.href)}>
+                  <DropdownMenuItem
+                    key={item.label}
+                    onClick={() => handleNavigate(item.href)}
+                    className="gap-2"
+                  >
+                    <span>{item.icon}</span>
                     {item.label}
                   </DropdownMenuItem>
                 ))}
@@ -154,7 +165,9 @@ export function DashboardHeader() {
                     setMobileMenuOpen(false);
                     setCommandPaletteOpen(true);
                   }}
+                  className="gap-2"
                 >
+                  <Search className="h-4 w-4" />
                   Search
                 </DropdownMenuItem>
               </DropdownMenuContent>
