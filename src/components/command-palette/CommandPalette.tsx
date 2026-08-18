@@ -140,9 +140,9 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
         <CommandGroup heading="Navigation">
           {navigationItems.map((item) => (
             <CommandItem key={item.id} onSelect={() => handleNavigate(item.path)}>
-              <item.icon className="mr-2 h-4 w-4" />
-              <span>{item.label}</span>
-              <kbd className="ml-auto text-xs opacity-60">{item.shortcut}</kbd>
+              <item.icon className="mr-2 h-4 w-4 shrink-0" />
+              <span className="flex-1">{item.label}</span>
+              <kbd className="ml-auto text-xs opacity-60 hidden sm:inline">{item.shortcut}</kbd>
             </CommandItem>
           ))}
         </CommandGroup>
@@ -150,9 +150,9 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
         <CommandGroup heading="Actions">
           {actionItems.map((item) => (
             <CommandItem key={item.id} onSelect={item.action}>
-              <item.icon className="mr-2 h-4 w-4" />
-              <span>{item.label}</span>
-              <kbd className="ml-auto text-xs opacity-60">{item.shortcut}</kbd>
+              <item.icon className="mr-2 h-4 w-4 shrink-0" />
+              <span className="flex-1">{item.label}</span>
+              <kbd className="ml-auto text-xs opacity-60 hidden sm:inline">{item.shortcut}</kbd>
             </CommandItem>
           ))}
         </CommandGroup>
@@ -160,9 +160,9 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
         <CommandGroup heading="Settings">
           {settingsItems.map((item) => (
             <CommandItem key={item.id} onSelect={item.action}>
-              <item.icon className="mr-2 h-4 w-4" />
-              <span>{item.label}</span>
-              <kbd className="ml-auto text-xs opacity-60">{item.shortcut}</kbd>
+              <item.icon className="mr-2 h-4 w-4 shrink-0" />
+              <span className="flex-1">{item.label}</span>
+              <kbd className="ml-auto text-xs opacity-60 hidden sm:inline">{item.shortcut}</kbd>
             </CommandItem>
           ))}
         </CommandGroup>
