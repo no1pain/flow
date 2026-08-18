@@ -99,23 +99,21 @@ export function DashboardHeader() {
             {user && <NotificationBell userId={user.id} />}
 
             <DropdownMenu>
-              <DropdownMenuTrigger>
-                <Button variant="ghost" size="icon" className="relative h-9 w-9">
-                  <Avatar className="h-8 w-8">
-                    {user?.user_metadata?.avatar_url ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
-                        src={user.user_metadata.avatar_url}
-                        alt={user.user_metadata.username || 'User'}
-                        className="h-full w-full object-cover"
-                      />
-                    ) : (
-                      <div className="flex h-full w-full items-center justify-center bg-primary text-primary-foreground font-medium">
-                        {(user?.user_metadata?.username || user?.email)?.charAt(0).toUpperCase()}
-                      </div>
-                    )}
-                  </Avatar>
-                </Button>
+              <DropdownMenuTrigger className="relative h-9 w-9 group/button inline-flex shrink-0 items-center justify-center rounded-lg border border-transparent bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none hover:bg-muted hover:text-foreground aria-expanded:bg-muted aria-expanded:text-foreground dark:hover:bg-muted/50 focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 active:not-aria-[haspopup]:translate-y-px disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4">
+                <Avatar className="h-8 w-8">
+                  {user?.user_metadata?.avatar_url ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={user.user_metadata.avatar_url}
+                      alt={user.user_metadata.username || 'User'}
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    <div className="flex h-full w-full items-center justify-center bg-primary text-primary-foreground font-medium">
+                      {(user?.user_metadata?.username || user?.email)?.charAt(0).toUpperCase()}
+                    </div>
+                  )}
+                </Avatar>
               </DropdownMenuTrigger>
               <DropdownMenuContent className="w-56">
                 <DropdownMenuLabel>
@@ -142,11 +140,9 @@ export function DashboardHeader() {
 
             {/* Mobile navigation menu */}
             <DropdownMenu open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
-              <DropdownMenuTrigger>
-                <Button variant="ghost" size="icon" className="md:hidden h-9 w-9">
-                  {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-                  <span className="sr-only">Toggle menu</span>
-                </Button>
+              <DropdownMenuTrigger className="md:hidden h-9 w-9 group/button inline-flex shrink-0 items-center justify-center rounded-lg border border-transparent bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none hover:bg-muted hover:text-foreground aria-expanded:bg-muted aria-expanded:text-foreground dark:hover:bg-muted/50 focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 active:not-aria-[haspopup]:translate-y-px disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4">
+                {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+                <span className="sr-only">Toggle menu</span>
               </DropdownMenuTrigger>
               <DropdownMenuContent className="w-56">
                 {navItems.map((item) => (
