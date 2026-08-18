@@ -96,12 +96,12 @@ export default function LoginPage() {
           </form>
         </CardContent>
         <CardFooter className="flex flex-col space-y-4">
-          <div className="text-sm text-center text-slate-600 dark:text-slate-400">
+          <div className="text-sm text-center text-muted-foreground">
             <Link href="/forgot-password" className="hover:underline">
               Forgot your password?
             </Link>
           </div>
-          <div className="text-sm text-center text-slate-600 dark:text-slate-400">
+          <div className="text-sm text-center text-muted-foreground">
             Don&apos;t have an account?{' '}
             <Link href="/register" className="font-medium text-primary hover:underline">
               Sign up

@@ -117,7 +117,7 @@ export default function DocumentDetailPage() {
           </div>
         </div>
 
-        <div className="bg-white dark:bg-slate-800 rounded-lg shadow-lg p-6 mb-6">
+        <div className="bg-card rounded-lg shadow-lg p-6 border mb-6">
           <Input
             value={title}
             onChange={(e) => {
@@ -135,7 +135,7 @@ export default function DocumentDetailPage() {
           </div>
         </div>
 
-        <div className="bg-white dark:bg-slate-800 rounded-lg shadow-lg p-6">
+        <div className="bg-card rounded-lg shadow-lg p-6 border">
           <DocumentEditor
             content={content}
             onChange={(newContent) => {

@@ -22,12 +22,12 @@ import { useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
 
 const navItems = [
-  { label: 'Workspaces', href: '/dashboard/workspaces', icon: '🏢' },
-  { label: 'Projects', href: '/dashboard/projects', icon: '📁' },
-  { label: 'Tasks', href: '/dashboard/tasks', icon: '✅' },
-  { label: 'Documents', href: '/dashboard/documents', icon: '📄' },
-  { label: 'Analytics', href: '/dashboard/analytics', icon: '📊' },
-  { label: 'Time', href: '/dashboard/time-tracking', icon: '⏱️' },
+  { label: 'Workspaces', href: '/dashboard/workspaces' },
+  { label: 'Projects', href: '/dashboard/projects' },
+  { label: 'Tasks', href: '/dashboard/tasks' },
+  { label: 'Documents', href: '/dashboard/documents' },
+  { label: 'Analytics', href: '/dashboard/analytics' },
+  { label: 'Time', href: '/dashboard/time-tracking' },
 ];
 
 export function DashboardHeader() {
@@ -53,7 +53,7 @@ export function DashboardHeader() {
         <div className="flex h-16 items-center justify-between gap-4 px-4 sm:px-6 lg:px-8 w-full">
           <div className="flex items-center gap-4 min-w-0">
             <div className="flex items-center gap-2 min-w-0">
-              <span className="text-xl font-bold shrink-0 bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+              <span className="text-xl font-bold font-heading shrink-0 bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
                 Flow
               </span>
               {currentWorkspace && (
@@ -70,9 +70,8 @@ export function DashboardHeader() {
                   variant="ghost"
                   size="sm"
                   onClick={() => router.push(item.href)}
-                  className="gap-1.5"
+                  className="font-heading font-semibold"
                 >
-                  <span className="hidden lg:inline">{item.icon}</span>
                   {item.label}
                 </Button>
               ))}
@@ -149,9 +148,8 @@ export function DashboardHeader() {
                   <DropdownMenuItem
                     key={item.label}
                     onClick={() => handleNavigate(item.href)}
-                    className="gap-2"
+                    className="font-heading font-semibold"
                   >
-                    <span>{item.icon}</span>
                     {item.label}
                   </DropdownMenuItem>
                 ))}

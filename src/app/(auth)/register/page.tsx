@@ -111,7 +111,7 @@ export default function RegisterPage() {
           </form>
         </CardContent>
         <CardFooter className="flex flex-col space-y-4">
-          <div className="text-sm text-center text-slate-600 dark:text-slate-400">
+          <div className="text-sm text-center text-muted-foreground">
             Already have an account?{' '}
             <Link href="/login" className="font-medium text-primary hover:underline">
               Sign in

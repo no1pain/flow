@@ -72,16 +72,16 @@ export default function ProjectTasksPage() {
           </Button>
           <div className="flex-1">
             <h1 className="text-3xl font-bold">{project.name} - Tasks</h1>
-            <p className="text-slate-600 dark:text-slate-400">{currentWorkspace?.name}</p>
+            <p className="text-muted-foreground">{currentWorkspace?.name}</p>
           </div>
         </div>
 
         {!isActive ? (
           <div className="text-center py-12">
-            <div className="bg-white dark:bg-slate-800 rounded-lg shadow-lg p-8 max-w-md mx-auto">
+            <div className="bg-card rounded-lg shadow-lg p-8 border max-w-md mx-auto">
               <FolderKanban className="size-12 mx-auto mb-4 opacity-50" />
               <h2 className="text-xl font-semibold mb-4">Project is archived</h2>
-              <p className="text-slate-600 dark:text-slate-400">
+              <p className="text-muted-foreground">
                 This project is archived. Activate it to manage tasks.
               </p>
             </div>

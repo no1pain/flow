@@ -88,7 +88,7 @@ export default function ProjectDetailPage() {
                 )}
               </Badge>
             </div>
-            <p className="text-slate-600 dark:text-slate-400">
+            <p className="text-muted-foreground">
               Created {new Date(project.created_at).toLocaleDateString()}
             </p>
           </div>
@@ -121,17 +121,17 @@ export default function ProjectDetailPage() {
               <CardContent>
                 {project.description && (
                   <div className="mb-4">
-                    <p className="text-sm text-slate-600 dark:text-slate-400 mb-2">Description</p>
+                    <p className="text-sm text-muted-foreground mb-2">Description</p>
                     <p className="text-base">{project.description}</p>
                   </div>
                 )}
                 <div className="grid grid-cols-2 gap-4">
                   <div className="p-4 bg-slate-50 dark:bg-slate-700 rounded-lg">
-                    <p className="text-sm text-slate-600 dark:text-slate-400">Tasks</p>
+                    <p className="text-sm text-muted-foreground">Tasks</p>
                     <p className="text-2xl font-bold">{project.task_count || 0}</p>
                   </div>
                   <div className="p-4 bg-slate-50 dark:bg-slate-700 rounded-lg">
-                    <p className="text-sm text-slate-600 dark:text-slate-400">Members</p>
+                    <p className="text-sm text-muted-foreground">Members</p>
                     <p className="text-2xl font-bold">{project.member_count || 0}</p>
                   </div>
                 </div>
@@ -195,17 +195,17 @@ export default function ProjectDetailPage() {
               <CardContent>
                 <div className="space-y-3">
                   <div>
-                    <p className="text-sm text-slate-600 dark:text-slate-400">Workspace</p>
+                    <p className="text-sm text-muted-foreground">Workspace</p>
                     <p className="font-medium">{currentWorkspace?.name || 'Unknown'}</p>
                   </div>
                   <div>
-                    <p className="text-sm text-slate-600 dark:text-slate-400">Created</p>
+                    <p className="text-sm text-muted-foreground">Created</p>
                     <p className="font-medium">
                       {new Date(project.created_at).toLocaleDateString()}
                     </p>
                   </div>
                   <div>
-                    <p className="text-sm text-slate-600 dark:text-slate-400">Project ID</p>
+                    <p className="text-sm text-muted-foreground">Project ID</p>
                     <p className="font-medium text-xs font-mono">{project.id}</p>
                   </div>
                 </div>

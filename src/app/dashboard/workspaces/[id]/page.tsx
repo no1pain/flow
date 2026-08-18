@@ -55,7 +55,7 @@ export default function WorkspaceDetailPage() {
           </Button>
           <div className="flex-1">
             <h1 className="text-3xl font-bold">{workspace.name}</h1>
-            <p className="text-slate-600 dark:text-slate-400">
+            <p className="text-muted-foreground">
               Created {new Date(workspace.created_at || '').toLocaleDateString()}
             </p>
           </div>
@@ -75,11 +75,11 @@ export default function WorkspaceDetailPage() {
               <CardContent>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="p-4 bg-slate-50 dark:bg-slate-700 rounded-lg">
-                    <p className="text-sm text-slate-600 dark:text-slate-400">Members</p>
+                    <p className="text-sm text-muted-foreground">Members</p>
                     <p className="text-2xl font-bold">{workspace.member_count}</p>
                   </div>
                   <div className="p-4 bg-slate-50 dark:bg-slate-700 rounded-lg">
-                    <p className="text-sm text-slate-600 dark:text-slate-400">Projects</p>
+                    <p className="text-sm text-muted-foreground">Projects</p>
                     <p className="text-2xl font-bold">0</p>
                   </div>
                 </div>

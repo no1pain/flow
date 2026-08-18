@@ -120,7 +120,7 @@ export default function DocumentsPage() {
               Back to Workspaces
             </Button>
             <h1 className="text-3xl font-bold">Documents</h1>
-            <p className="text-slate-600 dark:text-slate-400 mt-1">{currentWorkspace.name}</p>
+            <p className="text-muted-foreground mt-1">{currentWorkspace.name}</p>
           </div>
           <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
             <DialogTrigger>
@@ -186,7 +186,7 @@ export default function DocumentsPage() {
         </div>
 
         <div className="grid grid-cols-4 gap-6">
-          <div className="bg-white dark:bg-slate-800 rounded-lg shadow-lg p-4 h-fit">
+          <div className="bg-card rounded-lg shadow-lg p-4 border h-fit">
             <h2 className="font-semibold mb-4">Folders</h2>
             <FolderTree
               folders={folders || []}
@@ -195,7 +195,7 @@ export default function DocumentsPage() {
               selectedFolderId={selectedFolderId}
             />
           </div>
-          <div className="col-span-3 bg-white dark:bg-slate-800 rounded-lg shadow-lg p-6">
+          <div className="col-span-3 bg-card rounded-lg shadow-lg p-6 border">
             <h2 className="font-semibold mb-4">
               {selectedFolderId ? 'Documents in folder' : 'All documents'}
             </h2>

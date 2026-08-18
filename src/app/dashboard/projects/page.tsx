@@ -52,7 +52,7 @@ export default function ProjectsPage() {
                 Back to Workspaces
               </Button>
               <h1 className="text-3xl font-bold">Projects</h1>
-              <p className="text-slate-600 dark:text-slate-400 mt-1">{currentWorkspace.name}</p>
+              <p className="text-muted-foreground mt-1">{currentWorkspace.name}</p>
             </div>
             <Skeleton className="h-10 w-40" />
           </div>
@@ -92,16 +92,16 @@ export default function ProjectsPage() {
               Back to Workspaces
             </Button>
             <h1 className="text-3xl font-bold">Projects</h1>
-            <p className="text-slate-600 dark:text-slate-400 mt-1">{currentWorkspace.name}</p>
+            <p className="text-muted-foreground mt-1">{currentWorkspace.name}</p>
           </div>
           <CreateProjectDialog workspaceId={currentWorkspace.id} />
         </div>
 
         {!projects || projects.length === 0 ? (
           <div className="text-center py-12">
-            <div className="bg-white dark:bg-slate-800 rounded-lg shadow-lg p-8 max-w-md mx-auto">
+            <div className="bg-card rounded-lg shadow-lg p-8 border max-w-md mx-auto">
               <h2 className="text-xl font-semibold mb-4">No projects yet</h2>
-              <p className="text-slate-600 dark:text-slate-400 mb-6">
+              <p className="text-muted-foreground mb-6">
                 Create your first project to start organizing your tasks.
               </p>
               <CreateProjectDialog

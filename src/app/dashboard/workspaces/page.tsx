@@ -61,9 +61,9 @@ export default function WorkspacesPage() {
 
         {!workspaces || workspaces.length === 0 ? (
           <div className="text-center py-12">
-            <div className="bg-white dark:bg-slate-800 rounded-lg shadow-lg p-8 max-w-md mx-auto">
+            <div className="bg-card rounded-lg shadow-lg p-8 border max-w-md mx-auto">
               <h2 className="text-xl font-semibold mb-4">No workspaces yet</h2>
-              <p className="text-slate-600 dark:text-slate-400 mb-6">
+              <p className="text-muted-foreground mb-6">
                 Create your first workspace to get started with Flow.
               </p>
               <CreateWorkspaceDialog

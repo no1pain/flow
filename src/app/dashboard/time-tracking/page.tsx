@@ -18,11 +18,9 @@ export default function TimeTrackingPage() {
     return (
       <div className="min-h-screen bg-background p-8">
         <div className="max-w-6xl mx-auto">
-          <div className="bg-white dark:bg-slate-800 rounded-lg shadow-lg p-8">
+          <div className="bg-card rounded-lg shadow-lg p-8 border">
             <h2 className="text-xl font-semibold mb-4">No workspace selected</h2>
-            <p className="text-slate-600 dark:text-slate-400">
-              Please select a workspace to track time.
-            </p>
+            <p className="text-muted-foreground">Please select a workspace to track time.</p>
           </div>
         </div>
       </div>

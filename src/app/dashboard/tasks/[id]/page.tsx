@@ -126,7 +126,7 @@ export default function TaskDetailPage() {
                 {status.label}
               </Badge>
             </div>
-            <p className="text-slate-600 dark:text-slate-400">
+            <p className="text-muted-foreground">
               Created {new Date(task.created_at || '').toLocaleDateString()}
             </p>
           </div>
@@ -203,7 +203,7 @@ export default function TaskDetailPage() {
               <CardContent>
                 <div className="space-y-4">
                   <div>
-                    <p className="text-sm text-slate-600 dark:text-slate-400 mb-1">Status</p>
+                    <p className="text-sm text-muted-foreground mb-1">Status</p>
                     <Badge
                       variant={status.color as 'default' | 'secondary' | 'destructive' | 'outline'}
                     >
@@ -212,7 +212,7 @@ export default function TaskDetailPage() {
                     </Badge>
                   </div>
                   <div>
-                    <p className="text-sm text-slate-600 dark:text-slate-400 mb-1">Priority</p>
+                    <p className="text-sm text-muted-foreground mb-1">Priority</p>
                     <Badge
                       variant={
                         priority.color as 'default' | 'secondary' | 'destructive' | 'outline'
@@ -224,7 +224,7 @@ export default function TaskDetailPage() {
                   </div>
                   {task.assignee && (
                     <div>
-                      <p className="text-sm text-slate-600 dark:text-slate-400 mb-1">Assignee</p>
+                      <p className="text-sm text-muted-foreground mb-1">Assignee</p>
                       <div className="flex items-center gap-2">
                         <Avatar className="size-6">
                           <AvatarImage src={task.assignee.avatar_url || undefined} />
@@ -238,7 +238,7 @@ export default function TaskDetailPage() {
                   )}
                   {task.creator && (
                     <div>
-                      <p className="text-sm text-slate-600 dark:text-slate-400 mb-1">Created by</p>
+                      <p className="text-sm text-muted-foreground mb-1">Created by</p>
                       <div className="flex items-center gap-2">
                         <Avatar className="size-6">
                           <AvatarImage src={task.creator.avatar_url || undefined} />
@@ -251,13 +251,13 @@ export default function TaskDetailPage() {
                     </div>
                   )}
                   <div>
-                    <p className="text-sm text-slate-600 dark:text-slate-400 mb-1">Created</p>
+                    <p className="text-sm text-muted-foreground mb-1">Created</p>
                     <p className="font-medium">
                       {new Date(task.created_at || '').toLocaleString()}
                     </p>
                   </div>
                   <div>
-                    <p className="text-sm text-slate-600 dark:text-slate-400 mb-1">Last updated</p>
+                    <p className="text-sm text-muted-foreground mb-1">Last updated</p>
                     <p className="font-medium">
                       {new Date(task.updated_at || '').toLocaleString()}
                     </p>
