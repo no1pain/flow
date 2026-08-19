@@ -138,6 +138,14 @@
   h6 {
     @apply font-heading;
   }
+
+  kbd {
+    @apply inline-flex items-center rounded-md border border-border bg-muted/50 px-1.5 py-0.5 font-mono text-[10px] font-medium text-foreground/80 shadow-sm backdrop-blur-sm;
+  }
+
+  .dark kbd {
+    @apply bg-muted/50 text-foreground/80;
+  }
 }
 
 /* Tiptap Prose Styles */

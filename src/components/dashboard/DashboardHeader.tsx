@@ -6,7 +6,6 @@ import { useWorkspaceStore } from '@/features/workspace/store';
 import { CommandPalette } from '@/components/command-palette/CommandPalette';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { NotificationBell } from '@/features/notifications/components/NotificationBell';
-import { KeyboardShortcutsDialog } from '@/components/keyboard-shortcuts/KeyboardShortcutsDialog';
 import { Button } from '@/components/ui/button';
 import { Avatar } from '@/components/ui/avatar';
 import {
@@ -87,13 +86,10 @@ export function DashboardHeader() {
             >
               <Search className="h-4 w-4" />
               <span className="text-muted-foreground hidden lg:inline">Search</span>
-              <kbd className="pointer-events-none ml-auto inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium opacity-100">
-                <span className="text-xs">⌘</span>K
-              </kbd>
+              <kbd className="pointer-events-none ml-auto">⌘K</kbd>
             </Button>
 
             <ThemeToggle />
-            <KeyboardShortcutsDialog />
 
             {user && <NotificationBell userId={user.id} />}
 
