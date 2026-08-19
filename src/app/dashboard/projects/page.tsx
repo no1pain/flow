@@ -18,6 +18,27 @@ export default function ProjectsPage() {
     router.push(`/dashboard/projects/${projectId}`);
   };
 
+  // Show loading state while checking for workspace
+  if (isLoading && !currentWorkspace) {
+    return (
+      <div className="min-h-screen bg-background p-8">
+        <div className="max-w-6xl mx-auto">
+          <div className="flex justify-between items-center mb-8">
+            <div>
+              <h1 className="text-3xl font-bold">Projects</h1>
+              <p className="text-muted-foreground mt-1">Loading...</p>
+            </div>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[1, 2, 3].map((i) => (
+              <Skeleton key={i} className="h-48 rounded-xl" />
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   if (!currentWorkspace) {
     return (
       <div className="min-h-screen bg-background p-8">
@@ -104,14 +125,7 @@ export default function ProjectsPage() {
               <p className="text-muted-foreground mb-6">
                 Create your first project to start organizing your tasks.
               </p>
-              <CreateProjectDialog
-                workspaceId={currentWorkspace.id}
-                trigger={
-                  <button className="w-full bg-primary text-primary-foreground px-4 py-2 rounded-lg hover:bg-primary/80 transition-colors">
-                    Create Project
-                  </button>
-                }
-              />
+              <CreateProjectDialog workspaceId={currentWorkspace.id} />
             </div>
           </div>
         ) : (

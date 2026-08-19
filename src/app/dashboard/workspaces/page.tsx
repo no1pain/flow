@@ -6,7 +6,7 @@ import { CreateWorkspaceDialog } from '@/features/workspace/components/CreateWor
 import { useWorkspaceStore } from '@/features/workspace/store';
 import { useRouter } from 'next/navigation';
 import { Skeleton } from '@/components/ui/skeleton';
-import type { Workspace } from '@/features/workspace/types';
+import type { Workspace, WorkspaceWithMembers } from '@/features/workspace/types';
 
 export default function WorkspacesPage() {
   const { data: workspaces, isLoading, error } = useWorkspaces();
@@ -14,9 +14,11 @@ export default function WorkspacesPage() {
   const router = useRouter();
 
   const handleSwitchWorkspace = (workspaceId: string) => {
-    const member = workspaces?.find((w) => w.workspaces?.[0]?.id === workspaceId);
-    if (member?.workspaces?.[0]) {
-      setCurrentWorkspace(member.workspaces[0] as Workspace);
+    const member = workspaces?.find(
+      (w) => (w.workspaces as unknown as Workspace)?.id === workspaceId
+    );
+    if (member?.workspaces) {
+      setCurrentWorkspace(member.workspaces as unknown as Workspace);
       router.push(`/dashboard/workspaces/${workspaceId}`);
     }
   };
@@ -66,28 +68,24 @@ export default function WorkspacesPage() {
               <p className="text-muted-foreground mb-6">
                 Create your first workspace to get started with Flow.
               </p>
-              <CreateWorkspaceDialog
-                trigger={
-                  <button className="w-full bg-primary text-primary-foreground px-4 py-2 rounded-lg hover:bg-primary/80 transition-colors">
-                    Create Workspace
-                  </button>
-                }
-              />
+              <CreateWorkspaceDialog />
             </div>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {workspaces.map((member) => {
-              const workspace = member.workspaces?.[0];
+              const workspace = member.workspaces as unknown as Workspace | null;
               if (!workspace) return null;
               return (
                 <WorkspaceCard
                   key={member.workspace_id}
-                  workspace={{
-                    ...workspace,
-                    members: [],
-                    member_count: 0,
-                  }}
+                  workspace={
+                    {
+                      ...workspace,
+                      members: [],
+                      member_count: 0,
+                    } as unknown as WorkspaceWithMembers
+                  }
                   currentRole={member.role}
                   onSwitch={handleSwitchWorkspace}
                 />

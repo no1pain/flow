@@ -42,16 +42,12 @@ export default function LoginPage() {
     formData.append('email', data.email);
     formData.append('password', data.password);
 
-    try {
-      const result = await login(formData);
-      if (result?.error) {
-        setError(result.error);
-      }
-    } catch {
-      setError('An unexpected error occurred');
-    } finally {
+    const result = await login(formData);
+    if (result?.error) {
+      setError(result.error);
       setIsLoading(false);
     }
+    // If no error, the redirect will happen automatically from the server action
   };
 
   return (

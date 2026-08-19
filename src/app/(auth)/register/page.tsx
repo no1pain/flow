@@ -44,14 +44,9 @@ export default function RegisterPage() {
     formData.append('email', data.email);
     formData.append('password', data.password);
 
-    try {
-      const result = await registerAction(formData);
-      if (result?.error) {
-        setError(result.error);
-      }
-    } catch {
-      setError('An unexpected error occurred');
-    } finally {
+    const result = await registerAction(formData);
+    if (result?.error) {
+      setError(result.error);
       setIsLoading(false);
     }
   };

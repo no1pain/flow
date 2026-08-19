@@ -22,11 +22,17 @@ export async function login(formData: FormData) {
     };
   }
 
-  const { error } = await supabase.auth.signInWithPassword(validatedFields.data);
+  const { data: authData, error } = await supabase.auth.signInWithPassword(validatedFields.data);
 
   if (error) {
     return {
       error: error.message,
+    };
+  }
+
+  if (!authData.user) {
+    return {
+      error: 'Authentication failed',
     };
   }
 
@@ -52,7 +58,7 @@ export async function register(formData: FormData) {
     };
   }
 
-  const { error } = await supabase.auth.signUp({
+  const { data: authData, error } = await supabase.auth.signUp({
     email: validatedFields.data.email,
     password: validatedFields.data.password,
     options: {
@@ -65,6 +71,12 @@ export async function register(formData: FormData) {
   if (error) {
     return {
       error: error.message,
+    };
+  }
+
+  if (!authData.user) {
+    return {
+      error: 'Registration failed',
     };
   }
 

@@ -48,7 +48,36 @@ export const workspaceService = {
       .order('created_at', { ascending: true });
 
     if (error) throw error;
-    return data;
+
+    const workspaceIds = data?.map((m) => m.workspace_id) || [];
+    const { data: memberCounts, error: countError } = await supabase
+      .from('workspace_members')
+      .select('workspace_id')
+      .in('workspace_id', workspaceIds);
+
+    if (countError) {
+      console.error('Error fetching member counts:', countError);
+      return data;
+    }
+
+    const counts =
+      memberCounts?.reduce(
+        (acc, member) => {
+          acc[member.workspace_id] = (acc[member.workspace_id] || 0) + 1;
+          return acc;
+        },
+        {} as Record<string, number>
+      ) || {};
+
+    return (
+      data?.map((member) => ({
+        ...member,
+        workspaces: {
+          ...member.workspaces,
+          member_count: counts[member.workspace_id] || 0,
+        },
+      })) || data
+    );
   },
 
   async getWorkspaceById(id: string) {

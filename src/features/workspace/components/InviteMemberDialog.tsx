@@ -17,6 +17,7 @@ import { Badge } from '@/components/ui/badge';
 import { UserPlus } from 'lucide-react';
 import { useCreateInvitation } from '../hooks/useWorkspaceInvitations';
 import { useAuth } from '@/features/auth/hooks/useAuth';
+import { cn } from '@/lib/utils';
 
 interface InviteMemberDialogProps {
   workspaceId: string;
@@ -57,12 +58,16 @@ export function InviteMemberDialog({ workspaceId, trigger }: InviteMemberDialogP
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger>
+      <DialogTrigger
+        className={cn(
+          "group/button inline-flex shrink-0 items-center justify-center rounded-lg border border-input bg-background hover:bg-accent hover:text-accent-foreground h-7 gap-1 rounded-[min(var(--radius-md),12px)] px-2.5 text-[0.8rem] in-data-[slot=button-group]:rounded-lg has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-3.5 transition-all outline-none select-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 active:not-aria-[haspopup]:translate-y-px disabled:pointer-events-none disabled:opacity-50"
+        )}
+      >
         {trigger || (
-          <button className="group/button inline-flex shrink-0 items-center justify-center rounded-lg border border-input bg-background hover:bg-accent hover:text-accent-foreground h-7 gap-1 rounded-[min(var(--radius-md),12px)] px-2.5 text-[0.8rem] in-data-[slot=button-group]:rounded-lg has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-3.5 transition-all outline-none select-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 active:not-aria-[haspopup]:translate-y-px disabled:pointer-events-none disabled:opacity-50">
+          <>
             <UserPlus className="size-3.5 mr-2" />
             Invite
-          </button>
+          </>
         )}
       </DialogTrigger>
       <DialogContent>

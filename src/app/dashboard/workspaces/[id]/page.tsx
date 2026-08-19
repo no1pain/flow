@@ -4,6 +4,7 @@ import { useParams } from 'next/navigation';
 import { useWorkspaceWithMembers } from '@/features/workspace/hooks/useWorkspaces';
 import { useWorkspaceMembers } from '@/features/workspace/hooks/useWorkspaceMembers';
 import { useWorkspaceInvitations } from '@/features/workspace/hooks/useWorkspaceInvitations';
+import { useProjectsWithDetails } from '@/features/projects/hooks/useProjects';
 import { InviteMemberDialog } from '@/features/workspace/components/InviteMemberDialog';
 import { Avatar } from '@/components/ui/avatar';
 import type { WorkspaceMember, WorkspaceInvitationWithDetails } from '@/features/workspace/types';
@@ -22,6 +23,7 @@ export default function WorkspaceDetailPage() {
   const { data: workspace, isLoading: workspaceLoading } = useWorkspaceWithMembers(workspaceId);
   const { data: members, isLoading: membersLoading } = useWorkspaceMembers(workspaceId);
   const { data: invitations } = useWorkspaceInvitations(workspaceId);
+  const { data: projects } = useProjectsWithDetails(workspaceId);
 
   if (workspaceLoading || membersLoading) {
     return (
@@ -80,7 +82,7 @@ export default function WorkspaceDetailPage() {
                   </div>
                   <div className="p-4 bg-slate-50 dark:bg-slate-700 rounded-lg">
                     <p className="text-sm text-muted-foreground">Projects</p>
-                    <p className="text-2xl font-bold">0</p>
+                    <p className="text-2xl font-bold">{projects?.length || 0}</p>
                   </div>
                 </div>
               </CardContent>
@@ -99,11 +101,40 @@ export default function WorkspaceDetailPage() {
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="text-center py-8 text-slate-500 dark:text-slate-400">
-                  <Button variant="link" onClick={() => router.push('/dashboard/projects')}>
-                    Go to Projects page to manage your workspace projects
-                  </Button>
-                </div>
+                {!projects || projects.length === 0 ? (
+                  <div className="text-center py-8 text-slate-500 dark:text-slate-400">
+                    <p>No projects yet</p>
+                    <Button variant="link" onClick={() => router.push('/dashboard/projects')}>
+                      Create your first project
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    {projects.slice(0, 3).map((project) => (
+                      <div
+                        key={project.id}
+                        className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-700 rounded-lg"
+                      >
+                        <div>
+                          <p className="font-medium">{project.name}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {project.description || 'No description'}
+                          </p>
+                        </div>
+                        <Badge variant="secondary">{project.status}</Badge>
+                      </div>
+                    ))}
+                    {projects.length > 3 && (
+                      <Button
+                        variant="link"
+                        className="w-full"
+                        onClick={() => router.push('/dashboard/projects')}
+                      >
+                        View all {projects.length} projects
+                      </Button>
+                    )}
+                  </div>
+                )}
               </CardContent>
             </Card>
           </div>

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import {
   Dialog,
   DialogContent,
@@ -15,6 +16,9 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Plus } from 'lucide-react';
 import { createWorkspace } from '../actions';
+import { cn } from '@/lib/utils';
+import { useWorkspaceStore } from '../store';
+import type { Workspace } from '../types';
 
 interface CreateWorkspaceDialogProps {
   trigger?: React.ReactNode;
@@ -24,6 +28,8 @@ export function CreateWorkspaceDialog({ trigger }: CreateWorkspaceDialogProps) {
   const [open, setOpen] = useState(false);
   const [name, setName] = useState('');
   const [isPending, setIsPending] = useState(false);
+  const router = useRouter();
+  const setCurrentWorkspace = useWorkspaceStore((state) => state.setCurrentWorkspace);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -31,9 +37,13 @@ export function CreateWorkspaceDialog({ trigger }: CreateWorkspaceDialogProps) {
 
     setIsPending(true);
     try {
-      await createWorkspace({ name });
+      const workspace = await createWorkspace({ name });
       setName('');
       setOpen(false);
+
+      setCurrentWorkspace(workspace as Workspace);
+
+      router.push('/dashboard/projects');
     } catch (error) {
       console.error('Failed to create workspace:', error);
     } finally {
@@ -43,12 +53,16 @@ export function CreateWorkspaceDialog({ trigger }: CreateWorkspaceDialogProps) {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger>
+      <DialogTrigger
+        className={cn(
+          "group/button inline-flex shrink-0 items-center justify-center rounded-lg border border-transparent bg-primary text-primary-foreground hover:bg-primary/80 h-8 gap-1.5 px-2.5 has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 transition-all outline-none select-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 active:not-aria-[haspopup]:translate-y-px disabled:pointer-events-none disabled:opacity-50"
+        )}
+      >
         {trigger || (
-          <button className="group/button inline-flex shrink-0 items-center justify-center rounded-lg border border-transparent bg-primary text-primary-foreground hover:bg-primary/80 h-8 gap-1.5 px-2.5 has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 transition-all outline-none select-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 active:not-aria-[haspopup]:translate-y-px disabled:pointer-events-none disabled:opacity-50">
+          <>
             <Plus className="size-4 mr-2" />
             New Workspace
-          </button>
+          </>
         )}
       </DialogTrigger>
       <DialogContent>

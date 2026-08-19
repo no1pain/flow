@@ -1,8 +1,9 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { Bell } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -25,29 +26,37 @@ export function NotificationBell({ userId }: NotificationBellProps) {
   const [unreadCount, setUnreadCount] = useState(0);
   const [isOpen, setIsOpen] = useState(false);
 
-  const loadNotifications = useCallback(async () => {
-    try {
-      const [notifs, count] = await Promise.all([
-        notificationService.getNotifications(userId, 10),
-        notificationService.getNotificationCount(userId),
-      ]);
-      setNotifications(notifs);
-      setUnreadCount(count.unread);
-    } catch (error) {
-      console.error('Failed to load notifications:', error);
-    }
+  useEffect(() => {
+    if (!userId) return;
+    let ignore = false;
+
+    const load = async () => {
+      try {
+        const [notifs, count] = await Promise.all([
+          notificationService.getNotifications(userId, 10),
+          notificationService.getNotificationCount(userId),
+        ]);
+        if (ignore) return;
+        setNotifications(notifs);
+        setUnreadCount(count.unread);
+      } catch (error) {
+        console.error('Failed to load notifications:', error);
+      }
+    };
+
+    load();
+    return () => {
+      ignore = true;
+    };
   }, [userId]);
 
   useEffect(() => {
-    loadNotifications();
     const subscription = notificationService.subscribeToNotifications(userId, (payload) => {
       if (payload.eventType === 'INSERT') {
         setNotifications((prev) => [payload.new!, ...prev]);
         setUnreadCount((prev) => prev + 1);
       } else if (payload.eventType === 'UPDATE') {
-        setNotifications((prev) =>
-          prev.map((n) => (n.id === payload.new?.id ? payload.new! : n))
-        );
+        setNotifications((prev) => prev.map((n) => (n.id === payload.new?.id ? payload.new! : n)));
         if (payload.new?.is_read && !payload.old?.is_read) {
           setUnreadCount((prev) => Math.max(0, prev - 1));
         }
@@ -62,7 +71,7 @@ export function NotificationBell({ userId }: NotificationBellProps) {
     return () => {
       subscription.unsubscribe();
     };
-  }, [userId, loadNotifications]);
+  }, [userId]);
 
   const handleMarkAsRead = async (notificationId: string) => {
     try {
@@ -128,18 +137,20 @@ export function NotificationBell({ userId }: NotificationBellProps) {
 
   return (
     <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
-      <DropdownMenuTrigger>
-        <Button variant="ghost" size="icon" className="relative">
-          <Bell className="h-5 w-5" />
-          {unreadCount > 0 && (
-            <Badge
-              variant="destructive"
-              className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs"
-            >
-              {unreadCount > 9 ? '9+' : unreadCount}
-            </Badge>
-          )}
-        </Button>
+      <DropdownMenuTrigger
+        className={cn(
+          'relative inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground h-9 w-9 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50'
+        )}
+      >
+        <Bell className="h-5 w-5" />
+        {unreadCount > 0 && (
+          <Badge
+            variant="destructive"
+            className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs"
+          >
+            {unreadCount > 9 ? '9+' : unreadCount}
+          </Badge>
+        )}
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-80 max-h-96 overflow-y-auto">
         <DropdownMenuLabel className="flex items-center justify-between">
@@ -157,15 +168,14 @@ export function NotificationBell({ userId }: NotificationBellProps) {
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         {notifications.length === 0 ? (
-          <div className="p-4 text-center text-sm text-muted-foreground">
-            No notifications
-          </div>
+          <div className="p-4 text-center text-sm text-muted-foreground">No notifications</div>
         ) : (
           notifications.map((notification) => (
             <DropdownMenuItem
               key={notification.id}
-              className={`flex flex-col items-start p-3 ${!notification.is_read ? 'bg-muted/50' : ''
-                }`}
+              className={`flex flex-col items-start p-3 ${
+                !notification.is_read ? 'bg-muted/50' : ''
+              }`}
               onClick={() => {
                 if (!notification.is_read) {
                   handleMarkAsRead(notification.id);
@@ -184,9 +194,7 @@ export function NotificationBell({ userId }: NotificationBellProps) {
                     {formatDistanceToNow(new Date(notification.created_at), { addSuffix: true })}
                   </p>
                 </div>
-                {!notification.is_read && (
-                  <div className="h-2 w-2 rounded-full bg-primary" />
-                )}
+                {!notification.is_read && <div className="h-2 w-2 rounded-full bg-primary" />}
               </div>
             </DropdownMenuItem>
           ))
