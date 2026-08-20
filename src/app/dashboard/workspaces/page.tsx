@@ -83,7 +83,10 @@ export default function WorkspacesPage() {
                     {
                       ...workspace,
                       members: [],
-                      member_count: 0,
+                      member_count:
+                        (member.workspaces as { member_count?: number })?.member_count ??
+                        workspace.member_count ??
+                        0,
                     } as unknown as WorkspaceWithMembers
                   }
                   currentRole={member.role}

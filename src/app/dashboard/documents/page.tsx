@@ -10,6 +10,7 @@ import { useCreateDocument } from '@/features/documents/hooks';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Card, CardContent } from '@/components/ui/card';
 import { ArrowLeft, Plus, Search, File, FolderPlus } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
@@ -66,16 +67,34 @@ export default function DocumentsPage() {
     return (
       <div className="min-h-screen bg-background p-8">
         <div className="max-w-6xl mx-auto">
-          <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4">
-            <p className="text-yellow-800 dark:text-yellow-200">Please select a workspace first</p>
-            <Button
-              variant="link"
-              className="mt-2"
-              onClick={() => router.push('/dashboard/workspaces')}
-            >
-              Go to Workspaces
-            </Button>
-          </div>
+          <Card className="border-dashed">
+            <CardContent className="flex flex-col items-center justify-center py-16">
+              <div className="text-center max-w-md">
+                <div className="bg-primary/10 rounded-full p-4 mb-4 mx-auto w-fit">
+                  <svg
+                    className="size-8 text-primary"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
+                    />
+                  </svg>
+                </div>
+                <h3 className="text-lg font-semibold mb-2">No workspace selected</h3>
+                <p className="text-muted-foreground mb-6">
+                  Please select a workspace to view and manage documents
+                </p>
+                <Button onClick={() => router.push('/dashboard/workspaces')}>
+                  Go to Workspaces
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </div>
     );

@@ -6,21 +6,8 @@ import { useTheme } from 'next-themes';
 
 import { Button } from '@/components/ui/button';
 
-const subscribe = () => () => {};
-const getSnapshot = () => true;
-const getServerSnapshot = () => false;
-
 export function ThemeToggle() {
   const { theme, setTheme } = useTheme();
-  const mounted = React.useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
-
-  if (!mounted) {
-    return (
-      <Button variant="ghost" size="icon" disabled>
-        <Sun className="h-5 w-5" />
-      </Button>
-    );
-  }
 
   return (
     <Button

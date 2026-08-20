@@ -113,7 +113,8 @@ export default function WorkspaceDetailPage() {
                     {projects.slice(0, 3).map((project) => (
                       <div
                         key={project.id}
-                        className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-700 rounded-lg"
+                        className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-700 rounded-lg cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-600 transition-colors"
+                        onClick={() => router.push(`/dashboard/projects/${project.id}`)}
                       >
                         <div>
                           <p className="font-medium">{project.name}</p>
