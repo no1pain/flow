@@ -126,7 +126,7 @@ export function TaskForm({
                 onValueChange={(value: TaskStatus) => form.setValue('status', value)}
                 disabled={isSubmitting}
               >
-                <SelectTrigger id="status">
+                <SelectTrigger id="status" onMouseDown={(e) => e.stopPropagation()}>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -144,7 +144,7 @@ export function TaskForm({
                 onValueChange={(value: TaskPriority) => form.setValue('priority', value)}
                 disabled={isSubmitting}
               >
-                <SelectTrigger id="priority">
+                <SelectTrigger id="priority" onMouseDown={(e) => e.stopPropagation()}>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -165,7 +165,7 @@ export function TaskForm({
                 onValueChange={(value: string) => form.setValue('assignee_id', value || null)}
                 disabled={isSubmitting}
               >
-                <SelectTrigger id="assignee">
+                <SelectTrigger id="assignee" onMouseDown={(e) => e.stopPropagation()}>
                   <SelectValue placeholder="Select assignee" />
                 </SelectTrigger>
                 <SelectContent>

@@ -27,7 +27,7 @@ export default function WorkspaceDetailPage() {
 
   if (workspaceLoading || membersLoading) {
     return (
-      <div className="min-h-screen bg-background p-8">
+      <div className="min-h-screen bg-background p-4 md:p-8">
         <div className="max-w-6xl mx-auto">
           <Skeleton className="h-12 w-48 mb-6" />
           <Skeleton className="h-64 rounded-xl" />
@@ -38,7 +38,7 @@ export default function WorkspaceDetailPage() {
 
   if (!workspace) {
     return (
-      <div className="min-h-screen bg-background p-8">
+      <div className="min-h-screen bg-background p-4 md:p-8">
         <div className="max-w-6xl mx-auto">
           <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
             <p className="text-red-800 dark:text-red-200">Workspace not found</p>

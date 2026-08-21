@@ -10,7 +10,7 @@ export default function AnalyticsPage() {
 
   if (!currentWorkspace) {
     return (
-      <div className="min-h-screen bg-background p-8">
+      <div className="min-h-screen bg-background p-4 md:p-8">
         <div className="max-w-6xl mx-auto">
           <div className="bg-card rounded-lg shadow-lg p-8 border">
             <h2 className="text-xl font-semibold mb-4">No workspace selected</h2>
@@ -22,8 +22,8 @@ export default function AnalyticsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background p-8">
-      <div className="max-w-7xl mx-auto">
+    <div className="min-h-screen bg-background p-4 md:p-8">
+      <div className="max-w-6xl mx-auto">
         <Tabs defaultValue="overview" className="space-y-6">
           <TabsList>
             <TabsTrigger value="overview">Overview</TabsTrigger>

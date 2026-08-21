@@ -1,8 +1,9 @@
 'use client';
 
 import { useParams } from 'next/navigation';
-import { useProjectWithDetails } from '@/features/projects/hooks/useProjects';
+import { useProjectWithDetails, useProjectMembers } from '@/features/projects/hooks/useProjects';
 import { useWorkspaceStore } from '@/features/workspace/store';
+import { useTasks } from '@/features/tasks/hooks/useTasks';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -12,16 +13,26 @@ import { useRouter } from 'next/navigation';
 import { archiveProject, activateProject } from '@/features/projects/actions';
 import { AddMemberDialog } from '@/features/projects/components/AddMemberDialog';
 import { ProjectMembersList } from '@/features/projects/components/ProjectMembersList';
+import { TaskForm } from '@/features/tasks/components/TaskForm';
+import { TaskList } from '@/features/tasks/components/TaskList';
+import { createTask } from '@/features/tasks/actions';
+import type { TaskInsert } from '@/features/tasks/types';
 import { useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 
 export default function ProjectDetailPage() {
   const params = useParams();
   const projectId = params.id as string;
   const router = useRouter();
+  const queryClient = useQueryClient();
   const currentWorkspace = useWorkspaceStore((state) => state.currentWorkspace);
   const [addMemberOpen, setAddMemberOpen] = useState(false);
+  const [addTaskOpen, setAddTaskOpen] = useState(false);
+  const [isSubmittingTask, setIsSubmittingTask] = useState(false);
 
   const { data: project, isLoading, error } = useProjectWithDetails(projectId);
+  const { data: members } = useProjectMembers(projectId);
+  const { data: tasks, isLoading: tasksLoading } = useTasks(projectId);
 
   const handleArchive = async () => {
     try {
@@ -39,9 +50,27 @@ export default function ProjectDetailPage() {
     }
   };
 
+  const handleCreateTask = async (data: TaskInsert) => {
+    setIsSubmittingTask(true);
+    try {
+      await createTask(data);
+      queryClient.invalidateQueries({ queryKey: ['project', projectId, 'with-details'] });
+      queryClient.invalidateQueries({ queryKey: ['tasks', projectId] });
+      setAddTaskOpen(false);
+    } catch (error) {
+      console.error('Failed to create task:', error);
+    } finally {
+      setIsSubmittingTask(false);
+    }
+  };
+
+  const handleViewTask = (taskId: string) => {
+    router.push(`/dashboard/tasks/${taskId}`);
+  };
+
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-background p-8">
+      <div className="min-h-screen bg-background p-4 md:p-8">
         <div className="max-w-6xl mx-auto">
           <Skeleton className="h-12 w-48 mb-6" />
           <Skeleton className="h-64 rounded-xl" />
@@ -52,7 +81,7 @@ export default function ProjectDetailPage() {
 
   if (error || !project) {
     return (
-      <div className="min-h-screen bg-background p-8">
+      <div className="min-h-screen bg-background p-4 md:p-8">
         <div className="max-w-6xl mx-auto">
           <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
             <p className="text-red-800 dark:text-red-200">Project not found</p>
@@ -65,7 +94,7 @@ export default function ProjectDetailPage() {
   const isActive = project.status === 'ACTIVE';
 
   return (
-    <div className="min-h-screen bg-background p-8">
+    <div className="min-h-screen bg-background p-4 md:p-8">
       <div className="max-w-6xl mx-auto">
         <div className="flex items-center gap-4 mb-8">
           <Button variant="ghost" size="icon" onClick={() => router.push('/dashboard/projects')}>
@@ -132,7 +161,7 @@ export default function ProjectDetailPage() {
                   </div>
                   <div className="p-4 bg-slate-50 dark:bg-slate-700 rounded-lg">
                     <p className="text-sm text-muted-foreground">Members</p>
-                    <p className="text-2xl font-bold">{project.member_count || 0}</p>
+                    <p className="text-2xl font-bold">{members?.length || 0}</p>
                   </div>
                 </div>
               </CardContent>
@@ -140,28 +169,31 @@ export default function ProjectDetailPage() {
 
             <Card>
               <CardHeader>
-                <div className="flex justify-between items-center">
-                  <div>
-                    <CardTitle>Tasks</CardTitle>
-                    <CardDescription>Manage project tasks</CardDescription>
-                  </div>
-                  <Button size="sm" disabled={!isActive}>
-                    <Plus className="size-4 mr-2" />
-                    New Task
-                  </Button>
-                </div>
+                <CardTitle>Tasks</CardTitle>
+                <CardDescription>Manage project tasks</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="text-center py-8 text-slate-500 dark:text-slate-400">
-                  {isActive ? (
-                    <>
-                      <FolderKanban className="size-12 mx-auto mb-4 opacity-50" />
-                      <p>No tasks yet. Create your first task to get started.</p>
-                    </>
-                  ) : (
+                {isActive ? (
+                  <TaskList
+                    tasks={tasks || []}
+                    loading={tasksLoading}
+                    onViewTask={handleViewTask}
+                    onCreateTask={handleCreateTask}
+                    canEdit={true}
+                    projectId={projectId}
+                    members={
+                      members?.map((m) => ({
+                        id: m.user_id,
+                        username: m.profile?.username || 'Unknown',
+                        avatar_url: m.profile?.avatar_url,
+                      })) || []
+                    }
+                  />
+                ) : (
+                  <div className="text-center py-8 text-slate-500 dark:text-slate-400">
                     <p>This project is archived. Activate it to manage tasks.</p>
-                  )}
-                </div>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </div>
@@ -228,7 +260,12 @@ export default function ProjectDetailPage() {
                     <FolderKanban className="size-4 mr-2" />
                     View Tasks
                   </Button>
-                  <Button variant="outline" className="w-full justify-start" disabled={!isActive}>
+                  <Button
+                    variant="outline"
+                    className="w-full justify-start"
+                    disabled={!isActive}
+                    onClick={() => setAddTaskOpen(true)}
+                  >
                     <Plus className="size-4 mr-2" />
                     Add Task
                   </Button>
@@ -248,6 +285,20 @@ export default function ProjectDetailPage() {
       </div>
 
       <AddMemberDialog projectId={projectId} open={addMemberOpen} onOpenChange={setAddMemberOpen} />
+      <TaskForm
+        open={addTaskOpen}
+        onClose={() => setAddTaskOpen(false)}
+        onSubmit={handleCreateTask}
+        projectId={projectId}
+        members={
+          members?.map((m) => ({
+            id: m.user_id,
+            username: m.profile?.username || 'Unknown',
+            avatar_url: m.profile?.avatar_url,
+          })) || []
+        }
+        isSubmitting={isSubmittingTask}
+      />
     </div>
   );
 }

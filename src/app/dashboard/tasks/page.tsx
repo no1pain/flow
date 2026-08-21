@@ -12,7 +12,7 @@ export default function TasksPage() {
 
   if (!currentWorkspace) {
     return (
-      <div className="min-h-screen bg-background p-8">
+      <div className="min-h-screen bg-background p-4 md:p-8">
         <div className="max-w-6xl mx-auto">
           <Card className="border-dashed">
             <CardContent className="flex flex-col items-center justify-center py-16">

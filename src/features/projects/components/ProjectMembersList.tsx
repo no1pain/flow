@@ -66,7 +66,7 @@ export function ProjectMembersList({ projectId, canEdit = false }: ProjectMember
   }
 
   return (
-    <CardContent>
+    <CardContent className="p-0">
       {!members || members.length === 0 ? (
         <p className="text-sm text-slate-500 dark:text-slate-400 text-center py-4">
           No members yet. Add team members to collaborate.
