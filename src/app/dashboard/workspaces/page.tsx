@@ -1,17 +1,23 @@
 'use client';
 
-import { useWorkspaces } from '@/features/workspace/hooks/useWorkspaces';
+import { useWorkspaces, useDeleteWorkspace } from '@/features/workspace/hooks/useWorkspaces';
 import { WorkspaceCard } from '@/features/workspace/components/WorkspaceCard';
 import { CreateWorkspaceDialog } from '@/features/workspace/components/CreateWorkspaceDialog';
+import { EditWorkspaceDialog } from '@/features/workspace/components/EditWorkspaceDialog';
 import { useWorkspaceStore } from '@/features/workspace/store';
 import { useRouter } from 'next/navigation';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useState } from 'react';
 import type { Workspace, WorkspaceWithMembers } from '@/features/workspace/types';
 
 export default function WorkspacesPage() {
   const { data: workspaces, isLoading, error } = useWorkspaces();
   const setCurrentWorkspace = useWorkspaceStore((state) => state.setCurrentWorkspace);
+  const currentWorkspace = useWorkspaceStore((state) => state.currentWorkspace);
   const router = useRouter();
+  const deleteWorkspace = useDeleteWorkspace();
+  const [editingWorkspace, setEditingWorkspace] = useState<Workspace | null>(null);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
 
   const handleSwitchWorkspace = (workspaceId: string) => {
     const member = workspaces?.find(
@@ -20,6 +26,33 @@ export default function WorkspacesPage() {
     if (member?.workspaces) {
       setCurrentWorkspace(member.workspaces as unknown as Workspace);
       router.push(`/dashboard/workspaces/${workspaceId}`);
+    }
+  };
+
+  const handleEditWorkspace = (workspaceId: string) => {
+    const member = workspaces?.find(
+      (w) => (w.workspaces as unknown as Workspace)?.id === workspaceId
+    );
+    if (member?.workspaces) {
+      setEditingWorkspace(member.workspaces as unknown as Workspace);
+      setEditDialogOpen(true);
+    }
+  };
+
+  const handleDeleteWorkspace = (workspaceId: string) => {
+    if (
+      confirm(
+        'Are you sure you want to delete this workspace? This will permanently delete all projects, tasks, and data associated with this workspace. This action cannot be undone.'
+      )
+    ) {
+      deleteWorkspace.mutate(workspaceId, {
+        onSuccess: () => {
+          // Clear current workspace if it was the deleted one
+          if (currentWorkspace?.id === workspaceId) {
+            setCurrentWorkspace(null);
+          }
+        },
+      });
     }
   };
 
@@ -89,12 +122,22 @@ export default function WorkspacesPage() {
                   }
                   currentRole={member.role}
                   onSwitch={handleSwitchWorkspace}
+                  onEdit={handleEditWorkspace}
+                  onDelete={handleDeleteWorkspace}
                 />
               );
             })}
           </div>
         )}
       </div>
+
+      {editingWorkspace && (
+        <EditWorkspaceDialog
+          open={editDialogOpen}
+          onOpenChange={setEditDialogOpen}
+          workspace={editingWorkspace}
+        />
+      )}
     </div>
   );
 }

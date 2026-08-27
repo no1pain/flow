@@ -6,9 +6,14 @@ import {
   CardAction,
   CardFooter,
 } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import {
   MoreVertical,
   CheckCircle2,
@@ -17,6 +22,7 @@ import {
   ArrowUp,
   ArrowRight,
   MessageSquare,
+  Edit,
 } from 'lucide-react';
 import type { TaskWithDetails, TaskStatus, TaskPriority } from '../types';
 
@@ -57,18 +63,27 @@ export function TaskCard({ task, onView, onEdit, canEdit = false }: TaskCardProp
             <StatusIcon className="size-4" />
             {task.title}
           </span>
-          {canEdit && (
+          {canEdit && onEdit && (
             <CardAction>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onEdit?.(task.id);
-                }}
-              >
-                <MoreVertical className="size-4" />
-              </Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger
+                  className="inline-flex shrink-0 items-center justify-center rounded-lg border border-transparent bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none hover:bg-muted hover:text-foreground aria-expanded:bg-muted aria-expanded:text-foreground dark:hover:bg-muted/50 size-8 focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 active:not-aria-[haspopup]:translate-y-px disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <MoreVertical className="size-4" />
+                </DropdownMenuTrigger>
+                <DropdownMenuContent>
+                  <DropdownMenuItem
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onEdit(task.id);
+                    }}
+                  >
+                    <Edit className="size-4 mr-2" />
+                    Edit
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </CardAction>
           )}
         </CardTitle>

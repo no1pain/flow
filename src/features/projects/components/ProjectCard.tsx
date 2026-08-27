@@ -8,7 +8,13 @@ import {
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { MoreVertical, CheckCircle, Archive, FolderKanban } from 'lucide-react';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { MoreVertical, CheckCircle, Archive, FolderKanban, Edit, Trash2 } from 'lucide-react';
 import type { ProjectWithDetails } from '../types';
 
 interface ProjectCardProps {
@@ -17,6 +23,7 @@ interface ProjectCardProps {
   onEdit?: (id: string) => void;
   onArchive?: (id: string) => void;
   onActivate?: (id: string) => void;
+  onDelete?: (id: string) => void;
   canEdit?: boolean;
 }
 
@@ -24,8 +31,9 @@ export function ProjectCard({
   project,
   onView,
   onEdit,
-  onArchive: _onArchive,
-  onActivate: _onActivate,
+  onArchive,
+  onActivate,
+  onDelete,
   canEdit = false,
 }: ProjectCardProps) {
   const isActive = project.status === 'ACTIVE';
@@ -41,18 +49,63 @@ export function ProjectCard({
             <FolderKanban className="size-5" />
             {project.name}
           </span>
-          {canEdit && (
+          {canEdit && (onEdit || onArchive || onActivate || onDelete) && (
             <CardAction>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onEdit?.(project.id);
-                }}
-              >
-                <MoreVertical className="size-4" />
-              </Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger
+                  className="inline-flex shrink-0 items-center justify-center rounded-lg border border-transparent bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none hover:bg-muted hover:text-foreground aria-expanded:bg-muted aria-expanded:text-foreground dark:hover:bg-muted/50 size-8 focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 active:not-aria-[haspopup]:translate-y-px disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <MoreVertical className="size-4" />
+                </DropdownMenuTrigger>
+                <DropdownMenuContent>
+                  {onEdit && (
+                    <DropdownMenuItem
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onEdit(project.id);
+                      }}
+                    >
+                      <Edit className="size-4 mr-2" />
+                      Edit
+                    </DropdownMenuItem>
+                  )}
+                  {onArchive && isActive && (
+                    <DropdownMenuItem
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onArchive(project.id);
+                      }}
+                    >
+                      <Archive className="size-4 mr-2" />
+                      Archive
+                    </DropdownMenuItem>
+                  )}
+                  {onActivate && !isActive && (
+                    <DropdownMenuItem
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onActivate(project.id);
+                      }}
+                    >
+                      <CheckCircle className="size-4 mr-2" />
+                      Activate
+                    </DropdownMenuItem>
+                  )}
+                  {onDelete && (
+                    <DropdownMenuItem
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onDelete(project.id);
+                      }}
+                      className="text-destructive"
+                    >
+                      <Trash2 className="size-4 mr-2" />
+                      Delete
+                    </DropdownMenuItem>
+                  )}
+                </DropdownMenuContent>
+              </DropdownMenu>
             </CardAction>
           )}
         </CardTitle>

@@ -14,7 +14,7 @@ import {
   DragEndEvent,
 } from '@dnd-kit/core';
 import { sortableKeyboardCoordinates } from '@dnd-kit/sortable';
-import { useTasksWithDetails, useUpdateTask } from '../hooks/useTasks';
+import { useTasksWithDetails, useUpdateTask, useDeleteTask } from '../hooks/useTasks';
 import { TaskStatus, TaskPriority, TaskUpdate, type TaskWithDetails } from '../types';
 import { calculateNewPosition } from '../utils/position';
 import { KanbanColumn } from './KanbanColumn';
@@ -38,6 +38,7 @@ export function KanbanBoard({ projectId }: KanbanBoardProps) {
 
   const { data: tasks, isLoading } = useTasksWithDetails(projectId, filters);
   const updateTask = useUpdateTask();
+  const deleteTask = useDeleteTask();
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -136,7 +137,7 @@ export function KanbanBoard({ projectId }: KanbanBoardProps) {
         updates: {
           status: overId as TaskStatus,
           position: newPosition,
-        } as any,
+        } as TaskUpdate & { position: number },
       });
       return;
     }
@@ -161,6 +162,12 @@ export function KanbanBoard({ projectId }: KanbanBoardProps) {
           position: newPosition,
         } as TaskUpdate & { position: number },
       });
+    }
+  };
+
+  const handleDeleteTask = (taskId: string) => {
+    if (confirm('Are you sure you want to delete this task?')) {
+      deleteTask.mutate(taskId);
     }
   };
 
@@ -201,7 +208,9 @@ export function KanbanBoard({ projectId }: KanbanBoardProps) {
         >
           <option value="">All Assignees</option>
           {Array.from(
-            new Set(tasks?.map((t) => t.assignee_id).filter((id): id is string => id !== null) || [])
+            new Set(
+              tasks?.map((t) => t.assignee_id).filter((id): id is string => id !== null) || []
+            )
           ).map((assigneeId) => (
             <option key={assigneeId} value={assigneeId}>
               {tasks?.find((t) => t.assignee_id === assigneeId)?.assignee?.username}
@@ -225,6 +234,7 @@ export function KanbanBoard({ projectId }: KanbanBoardProps) {
               id={column.id}
               label={column.label}
               tasks={tasksByStatus[column.id] || []}
+              onDeleteTask={handleDeleteTask}
             />
           ))}
         </div>

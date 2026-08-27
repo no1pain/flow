@@ -1,6 +1,11 @@
 'use client';
 
-import { useProjectsWithDetails } from '@/features/projects/hooks/useProjects';
+import {
+  useProjectsWithDetails,
+  useDeleteProject,
+  useArchiveProject,
+  useActivateProject,
+} from '@/features/projects/hooks/useProjects';
 import { ProjectCard } from '@/features/projects/components/ProjectCard';
 import { CreateProjectDialog } from '@/features/projects/components/CreateProjectDialog';
 import { useWorkspaceStore } from '@/features/workspace/store';
@@ -14,9 +19,39 @@ export default function ProjectsPage() {
   const currentWorkspace = useWorkspaceStore((state) => state.currentWorkspace);
   const { data: projects, isLoading, error } = useProjectsWithDetails(currentWorkspace?.id || '');
   const router = useRouter();
+  const deleteProject = useDeleteProject();
+  const archiveProject = useArchiveProject();
+  const activateProject = useActivateProject();
 
   const handleViewProject = (projectId: string) => {
     router.push(`/dashboard/projects/${projectId}`);
+  };
+
+  const handleEditProject = (projectId: string) => {
+    // TODO: Open edit dialog
+    console.log('Edit project:', projectId);
+  };
+
+  const handleArchiveProject = (projectId: string) => {
+    if (confirm('Are you sure you want to archive this project?')) {
+      archiveProject.mutate(projectId);
+    }
+  };
+
+  const handleActivateProject = (projectId: string) => {
+    if (confirm('Are you sure you want to activate this project?')) {
+      activateProject.mutate(projectId);
+    }
+  };
+
+  const handleDeleteProject = (projectId: string) => {
+    if (
+      confirm(
+        'Are you sure you want to delete this project? This will permanently delete all tasks and data associated with this project. This action cannot be undone.'
+      )
+    ) {
+      deleteProject.mutate(projectId);
+    }
   };
 
   // Show loading state while checking for workspace
@@ -154,6 +189,10 @@ export default function ProjectsPage() {
                 key={project.id}
                 project={project}
                 onView={handleViewProject}
+                onEdit={handleEditProject}
+                onArchive={handleArchiveProject}
+                onActivate={handleActivateProject}
+                onDelete={handleDeleteProject}
                 canEdit={true}
               />
             ))}

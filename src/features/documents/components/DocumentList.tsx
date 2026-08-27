@@ -1,7 +1,6 @@
 'use client';
 
 import { File, MoreVertical, Trash2, Share2 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -52,10 +51,11 @@ export function DocumentList({
             <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded">Public</span>
           )}
           <DropdownMenu>
-            <DropdownMenuTrigger onClick={(e) => e.stopPropagation()}>
-              <Button variant="ghost" size="sm" className="opacity-0 group-hover:opacity-100">
-                <MoreVertical className="h-4 w-4" />
-              </Button>
+            <DropdownMenuTrigger
+              className="inline-flex shrink-0 items-center justify-center rounded-lg border border-transparent bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none hover:bg-muted hover:text-foreground aria-expanded:bg-muted aria-expanded:text-foreground dark:hover:bg-muted/50 opacity-0 group-hover:opacity-100 h-8 w-8 focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 active:not-aria-[haspopup]:translate-y-px disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <MoreVertical className="h-4 w-4" />
             </DropdownMenuTrigger>
             <DropdownMenuContent>
               {onShareDocument && (

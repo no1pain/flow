@@ -9,9 +9,10 @@ interface KanbanColumnProps {
   id: string;
   label: string;
   tasks: TaskWithDetails[];
+  onDeleteTask?: (taskId: string) => void;
 }
 
-export function KanbanColumn({ id, label, tasks }: KanbanColumnProps) {
+export function KanbanColumn({ id, label, tasks, onDeleteTask }: KanbanColumnProps) {
   const { setNodeRef } = useDroppable({ id });
 
   return (
@@ -29,12 +30,10 @@ export function KanbanColumn({ id, label, tasks }: KanbanColumnProps) {
         >
           <div ref={setNodeRef} className="space-y-2 min-h-[200px]">
             {tasks.map((task) => (
-              <KanbanTaskCard key={task.id} task={task} />
+              <KanbanTaskCard key={task.id} task={task} onDelete={onDeleteTask} />
             ))}
             {tasks.length === 0 && (
-              <div className="text-center text-sm text-muted-foreground py-8">
-                No tasks
-              </div>
+              <div className="text-center text-sm text-muted-foreground py-8">No tasks</div>
             )}
           </div>
         </SortableContext>

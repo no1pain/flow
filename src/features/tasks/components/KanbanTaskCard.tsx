@@ -2,9 +2,22 @@
 
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { Card, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardFooter,
+  CardAction,
+} from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import {
   CheckCircle2,
   Circle,
@@ -13,28 +26,37 @@ import {
   ArrowRight,
   MessageSquare,
   GripVertical,
+  MoreVertical,
+  Trash2,
 } from 'lucide-react';
 import type { TaskWithDetails } from '../types';
 
 interface KanbanTaskCardProps {
   task: TaskWithDetails;
   isDragging?: boolean;
+  onDelete?: (taskId: string) => void;
 }
 
-const priorityConfig: Record<string, { label: string; color: string; icon: React.ComponentType<{ className?: string }> }> = {
+const priorityConfig: Record<
+  string,
+  { label: string; color: string; icon: React.ComponentType<{ className?: string }> }
+> = {
   LOW: { label: 'Low', color: 'secondary', icon: ArrowRight },
   MEDIUM: { label: 'Medium', color: 'default', icon: ArrowRight },
   HIGH: { label: 'High', color: 'destructive', icon: ArrowUp },
   URGENT: { label: 'Urgent', color: 'destructive', icon: AlertCircle },
 };
 
-const statusConfig: Record<string, { label: string; color: string; icon: React.ComponentType<{ className?: string }> }> = {
+const statusConfig: Record<
+  string,
+  { label: string; color: string; icon: React.ComponentType<{ className?: string }> }
+> = {
   TODO: { label: 'Todo', color: 'secondary', icon: Circle },
   IN_PROGRESS: { label: 'In Progress', color: 'default', icon: ArrowRight },
   DONE: { label: 'Done', color: 'default', icon: CheckCircle2 },
 };
 
-export function KanbanTaskCard({ task, isDragging = false }: KanbanTaskCardProps) {
+export function KanbanTaskCard({ task, isDragging = false, onDelete }: KanbanTaskCardProps) {
   const {
     attributes,
     listeners,
@@ -54,13 +76,19 @@ export function KanbanTaskCard({ task, isDragging = false }: KanbanTaskCardProps
   const StatusIcon = status.icon;
   const PriorityIcon = priority.icon;
 
+  const handleDelete = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onDelete?.(task.id);
+  };
+
   return (
     <Card
       ref={setNodeRef}
       style={style}
       data-testid={`task-card-${task.id}`}
-      className={`hover:ring-2 hover:ring-ring/50 transition-all cursor-grab active:cursor-grabbing ${isDragging || isSortableDragging ? 'opacity-50' : ''
-        }`}
+      className={`hover:ring-2 hover:ring-ring/50 transition-all cursor-grab active:cursor-grabbing ${
+        isDragging || isSortableDragging ? 'opacity-50' : ''
+      }`}
     >
       <CardHeader className="pb-3">
         <div className="flex items-start gap-2">
@@ -82,6 +110,24 @@ export function KanbanTaskCard({ task, isDragging = false }: KanbanTaskCardProps
               </CardDescription>
             )}
           </div>
+          {onDelete && (
+            <CardAction>
+              <DropdownMenu>
+                <DropdownMenuTrigger
+                  className="inline-flex shrink-0 items-center justify-center rounded-lg border border-transparent bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none hover:bg-muted hover:text-foreground aria-expanded:bg-muted aria-expanded:text-foreground dark:hover:bg-muted/50 size-8 focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 active:not-aria-[haspopup]:translate-y-px disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <MoreVertical className="size-4" />
+                </DropdownMenuTrigger>
+                <DropdownMenuContent>
+                  <DropdownMenuItem onClick={handleDelete} className="text-destructive">
+                    <Trash2 className="size-4 mr-2" />
+                    Delete
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </CardAction>
+          )}
         </div>
       </CardHeader>
       <CardFooter className="pt-0 justify-between">

@@ -68,6 +68,11 @@ export default function ProjectDetailPage() {
     router.push(`/dashboard/tasks/${taskId}`);
   };
 
+  const handleEditTask = (taskId: string) => {
+    console.log('Edit task:', taskId);
+    // TODO: Open edit dialog
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background p-4 md:p-8">
@@ -179,6 +184,7 @@ export default function ProjectDetailPage() {
                     loading={tasksLoading}
                     onViewTask={handleViewTask}
                     onCreateTask={handleCreateTask}
+                    onEditTask={handleEditTask}
                     canEdit={true}
                     projectId={projectId}
                     members={
