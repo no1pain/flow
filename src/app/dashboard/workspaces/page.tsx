@@ -7,6 +7,7 @@ import { EditWorkspaceDialog } from '@/features/workspace/components/EditWorkspa
 import { useWorkspaceStore } from '@/features/workspace/store';
 import { useRouter } from 'next/navigation';
 import { Skeleton } from '@/components/ui/skeleton';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { useState } from 'react';
 import type { Workspace, WorkspaceWithMembers } from '@/features/workspace/types';
 
@@ -18,6 +19,8 @@ export default function WorkspacesPage() {
   const deleteWorkspace = useDeleteWorkspace();
   const [editingWorkspace, setEditingWorkspace] = useState<Workspace | null>(null);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [workspaceToDelete, setWorkspaceToDelete] = useState<string | null>(null);
 
   const handleSwitchWorkspace = (workspaceId: string) => {
     const member = workspaces?.find(
@@ -40,17 +43,19 @@ export default function WorkspacesPage() {
   };
 
   const handleDeleteWorkspace = (workspaceId: string) => {
-    if (
-      confirm(
-        'Are you sure you want to delete this workspace? This will permanently delete all projects, tasks, and data associated with this workspace. This action cannot be undone.'
-      )
-    ) {
-      deleteWorkspace.mutate(workspaceId, {
+    setWorkspaceToDelete(workspaceId);
+    setDeleteDialogOpen(true);
+  };
+
+  const confirmDeleteWorkspace = () => {
+    if (workspaceToDelete) {
+      deleteWorkspace.mutate(workspaceToDelete, {
         onSuccess: () => {
           // Clear current workspace if it was the deleted one
-          if (currentWorkspace?.id === workspaceId) {
+          if (currentWorkspace?.id === workspaceToDelete) {
             setCurrentWorkspace(null);
           }
+          setWorkspaceToDelete(null);
         },
       });
     }
@@ -138,6 +143,17 @@ export default function WorkspacesPage() {
           workspace={editingWorkspace}
         />
       )}
+
+      <ConfirmDialog
+        open={deleteDialogOpen}
+        onOpenChange={setDeleteDialogOpen}
+        title="Delete Workspace"
+        description="Are you sure you want to delete this workspace? This will permanently delete all projects, tasks, and data associated with this workspace. This action cannot be undone."
+        onConfirm={confirmDeleteWorkspace}
+        cancelText="Cancel"
+        confirmText="Delete"
+        variant="destructive"
+      />
     </div>
   );
 }

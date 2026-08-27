@@ -14,6 +14,8 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { ArrowLeft } from 'lucide-react';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
+import { useState } from 'react';
 
 export default function ProjectsPage() {
   const currentWorkspace = useWorkspaceStore((state) => state.currentWorkspace);
@@ -22,6 +24,12 @@ export default function ProjectsPage() {
   const deleteProject = useDeleteProject();
   const archiveProject = useArchiveProject();
   const activateProject = useActivateProject();
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [projectToDelete, setProjectToDelete] = useState<string | null>(null);
+  const [archiveDialogOpen, setArchiveDialogOpen] = useState(false);
+  const [projectToArchive, setProjectToArchive] = useState<string | null>(null);
+  const [activateDialogOpen, setActivateDialogOpen] = useState(false);
+  const [projectToActivate, setProjectToActivate] = useState<string | null>(null);
 
   const handleViewProject = (projectId: string) => {
     router.push(`/dashboard/projects/${projectId}`);
@@ -33,24 +41,38 @@ export default function ProjectsPage() {
   };
 
   const handleArchiveProject = (projectId: string) => {
-    if (confirm('Are you sure you want to archive this project?')) {
-      archiveProject.mutate(projectId);
-    }
+    setProjectToArchive(projectId);
+    setArchiveDialogOpen(true);
   };
 
   const handleActivateProject = (projectId: string) => {
-    if (confirm('Are you sure you want to activate this project?')) {
-      activateProject.mutate(projectId);
-    }
+    setProjectToActivate(projectId);
+    setActivateDialogOpen(true);
   };
 
   const handleDeleteProject = (projectId: string) => {
-    if (
-      confirm(
-        'Are you sure you want to delete this project? This will permanently delete all tasks and data associated with this project. This action cannot be undone.'
-      )
-    ) {
-      deleteProject.mutate(projectId);
+    setProjectToDelete(projectId);
+    setDeleteDialogOpen(true);
+  };
+
+  const confirmDeleteProject = () => {
+    if (projectToDelete) {
+      deleteProject.mutate(projectToDelete);
+      setProjectToDelete(null);
+    }
+  };
+
+  const confirmArchiveProject = () => {
+    if (projectToArchive) {
+      archiveProject.mutate(projectToArchive);
+      setProjectToArchive(null);
+    }
+  };
+
+  const confirmActivateProject = () => {
+    if (projectToActivate) {
+      activateProject.mutate(projectToActivate);
+      setProjectToActivate(null);
     }
   };
 
@@ -199,6 +221,39 @@ export default function ProjectsPage() {
           </div>
         )}
       </div>
+
+      <ConfirmDialog
+        open={deleteDialogOpen}
+        onOpenChange={setDeleteDialogOpen}
+        title="Delete Project"
+        description="Are you sure you want to delete this project? This will permanently delete all tasks and data associated with this project. This action cannot be undone."
+        onConfirm={confirmDeleteProject}
+        cancelText="Cancel"
+        confirmText="Delete"
+        variant="destructive"
+      />
+
+      <ConfirmDialog
+        open={archiveDialogOpen}
+        onOpenChange={setArchiveDialogOpen}
+        title="Archive Project"
+        description="Are you sure you want to archive this project? Archived projects can be reactivated later."
+        onConfirm={confirmArchiveProject}
+        cancelText="Cancel"
+        confirmText="Archive"
+        variant="default"
+      />
+
+      <ConfirmDialog
+        open={activateDialogOpen}
+        onOpenChange={setActivateDialogOpen}
+        title="Activate Project"
+        description="Are you sure you want to activate this project? This will make it available for task management."
+        onConfirm={confirmActivateProject}
+        cancelText="Cancel"
+        confirmText="Activate"
+        variant="default"
+      />
     </div>
   );
 }
