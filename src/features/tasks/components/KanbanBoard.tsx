@@ -186,7 +186,6 @@ export function KanbanBoard({ projectId }: KanbanBoardProps) {
 
     const newStatus: TaskStatus = task.status === 'DONE' ? 'TODO' : 'DONE';
 
-    // Calculate new position based on target column
     const targetColumnTasks = tasksByStatus[newStatus] || [];
     const newPosition = calculateNewPosition(
       targetColumnTasks.map((t) => ({ id: t.id, position: t.position || 0 })),
