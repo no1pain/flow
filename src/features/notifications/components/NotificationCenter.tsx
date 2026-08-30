@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useRouter } from 'next/navigation';
 import { Bell, X, Check, CheckCheck, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -24,6 +25,7 @@ interface NotificationCenterProps {
 type FilterType = 'all' | 'unread' | 'read';
 
 export function NotificationCenter({ userId }: NotificationCenterProps) {
+  const router = useRouter();
   const queryClient = useQueryClient();
   const [filter, setFilter] = useState<FilterType>('all');
 
@@ -144,6 +146,13 @@ export function NotificationCenter({ userId }: NotificationCenterProps) {
     }
   };
 
+  const handleNotificationClick = (notification: Notification) => {
+    const link = getNotificationLink(notification);
+    if (link !== '#') {
+      router.push(link);
+    }
+  };
+
   if (loading) {
     return (
       <div className="space-y-4">
@@ -257,7 +266,7 @@ export function NotificationCenter({ userId }: NotificationCenterProps) {
                   <Button
                     variant="link"
                     className="p-0 h-auto text-xs mt-2"
-                    onClick={() => (window.location.href = getNotificationLink(notification))}
+                    onClick={() => handleNotificationClick(notification)}
                   >
                     View
                   </Button>

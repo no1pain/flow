@@ -4,10 +4,11 @@ import { useParams, useRouter } from 'next/navigation';
 import { useTaskWithDetails } from '@/features/tasks/hooks/useTasks';
 import { useComments } from '@/features/tasks/hooks/useTasks';
 import { useTaskActivity } from '@/features/tasks/hooks/useTasks';
-import { deleteTask, createComment, deleteComment } from '@/features/tasks/actions';
-import type { TaskStatus, TaskPriority } from '@/features/tasks/types';
+import { deleteTask, createComment, deleteComment, updateTask } from '@/features/tasks/actions';
+import type { TaskStatus, TaskPriority, TaskInsert } from '@/features/tasks/types';
 import { CommentList } from '@/features/tasks/components/CommentList';
 import { TaskActivity } from '@/features/tasks/components/TaskActivity';
+import { TaskForm } from '@/features/tasks/components/TaskForm';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -25,6 +26,8 @@ import {
   History,
 } from 'lucide-react';
 import { useState } from 'react';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
+import { useProjectMembers } from '@/features/projects/hooks/useProjects';
 
 const priorityConfig = {
   LOW: { label: 'Low', color: 'secondary', icon: ArrowUp },
@@ -44,10 +47,14 @@ export default function TaskDetailPage() {
   const taskId = params.id as string;
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<'comments' | 'activity'>('comments');
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
 
   const { data: task, isLoading: taskLoading } = useTaskWithDetails(taskId);
   const { data: comments, isLoading: commentsLoading } = useComments('task', taskId);
   const { data: activities, isLoading: activitiesLoading } = useTaskActivity(taskId);
+  const { data: members } = useProjectMembers(task?.project_id || '');
 
   const handleAddComment = async (content: string) => {
     await createComment({
@@ -66,14 +73,35 @@ export default function TaskDetailPage() {
     return true;
   };
 
-  const handleDeleteTask = async () => {
-    if (confirm('Are you sure you want to delete this task?')) {
-      try {
-        await deleteTask(taskId);
-        router.back();
-      } catch (error) {
-        console.error('Failed to delete task:', error);
-      }
+  const handleDeleteTask = () => {
+    setDeleteDialogOpen(true);
+  };
+
+  const confirmDeleteTask = async () => {
+    try {
+      await deleteTask(taskId);
+      router.back();
+    } catch (error) {
+      console.error('Failed to delete task:', error);
+    }
+  };
+
+  const handleEditTask = async (data: TaskInsert) => {
+    if (!task) return;
+    setIsEditing(true);
+    try {
+      await updateTask(task.id, {
+        title: data.title,
+        description: data.description,
+        status: data.status,
+        priority: data.priority,
+        assignee_id: data.assignee_id,
+      });
+      setEditDialogOpen(false);
+    } catch (error) {
+      console.error('Failed to update task:', error);
+    } finally {
+      setIsEditing(false);
     }
   };
 
@@ -92,9 +120,20 @@ export default function TaskDetailPage() {
     return (
       <div className="min-h-screen bg-background p-4 md:p-8">
         <div className="max-w-6xl mx-auto">
-          <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
-            <p className="text-red-800 dark:text-red-200">Task not found</p>
-          </div>
+          <Card className="border-dashed">
+            <CardContent className="flex flex-col items-center justify-center py-16">
+              <div className="text-center max-w-md">
+                <div className="bg-destructive/10 rounded-full p-4 mb-4 mx-auto w-fit">
+                  <Trash2 className="size-8 text-destructive" />
+                </div>
+                <h3 className="text-lg font-semibold mb-2">Task not found</h3>
+                <p className="text-muted-foreground mb-6">
+                  This task may have been deleted or you don&apos;t have permission to view it.
+                </p>
+                <Button onClick={() => router.push('/dashboard/projects')}>Go to Projects</Button>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </div>
     );
@@ -131,7 +170,7 @@ export default function TaskDetailPage() {
             </p>
           </div>
           <div className="flex gap-2">
-            <Button variant="outline">
+            <Button variant="outline" onClick={() => setEditDialogOpen(true)}>
               <Edit2 className="size-4 mr-2" />
               Edit
             </Button>
@@ -140,6 +179,41 @@ export default function TaskDetailPage() {
               Delete
             </Button>
           </div>
+
+          <ConfirmDialog
+            open={deleteDialogOpen}
+            onOpenChange={setDeleteDialogOpen}
+            title="Delete Task"
+            description="Are you sure you want to delete this task? This action cannot be undone."
+            onConfirm={confirmDeleteTask}
+            cancelText="Cancel"
+            confirmText="Delete"
+            variant="destructive"
+          />
+
+          {task && task.project_id && (
+            <TaskForm
+              open={editDialogOpen}
+              onClose={() => setEditDialogOpen(false)}
+              onSubmit={handleEditTask}
+              initialData={{
+                title: task.title,
+                description: task.description || undefined,
+                status: task.status as TaskStatus,
+                priority: task.priority as TaskPriority,
+                assignee_id: task.assignee_id || undefined,
+              }}
+              projectId={task.project_id}
+              members={
+                members?.map((m) => ({
+                  id: m.user_id,
+                  username: m.profile?.username || '',
+                  avatar_url: m.profile?.avatar_url || null,
+                })) || []
+              }
+              isSubmitting={isEditing}
+            />
+          )}
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

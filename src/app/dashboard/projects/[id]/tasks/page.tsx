@@ -2,13 +2,15 @@
 
 import { useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { useTasksWithDetails } from '@/features/tasks/hooks/useTasks';
+import { useTasksWithDetails, useUpdateTask } from '@/features/tasks/hooks/useTasks';
 import { useProjectWithDetails } from '@/features/projects/hooks/useProjects';
 import { useWorkspaceStore } from '@/features/workspace/store';
 import { TaskList } from '@/features/tasks/components/TaskList';
 import { createTask } from '@/features/tasks/actions';
+import type { TaskStatus } from '@/features/tasks/types';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, FolderKanban } from 'lucide-react';
+import { Card, CardContent } from '@/components/ui/card';
+import { ArrowLeft, FolderKanban, Trash2 } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useProjectMembers } from '@/features/projects/hooks/useProjects';
 import type { TaskFilters, TaskSortOptions, TaskInsert } from '@/features/tasks/types';
@@ -25,6 +27,7 @@ export default function ProjectTasksPage() {
   const { data: project, isLoading: projectLoading } = useProjectWithDetails(projectId);
   const { data: tasks, isLoading: tasksLoading } = useTasksWithDetails(projectId, filters, sort);
   const { data: members } = useProjectMembers(projectId);
+  const updateTask = useUpdateTask();
 
   const handleCreateTask = async (data: TaskInsert) => {
     await createTask(data);
@@ -32,6 +35,18 @@ export default function ProjectTasksPage() {
 
   const handleViewTask = (taskId: string) => {
     router.push(`/dashboard/tasks/${taskId}`);
+  };
+
+  const handleStatusToggle = (taskId: string) => {
+    const task = tasks?.find((t) => t.id === taskId);
+    if (!task) return;
+
+    const newStatus: TaskStatus = task.status === 'DONE' ? 'TODO' : 'DONE';
+
+    updateTask.mutate({
+      id: taskId,
+      updates: { status: newStatus },
+    });
   };
 
   if (projectLoading) {
@@ -49,9 +64,20 @@ export default function ProjectTasksPage() {
     return (
       <div className="min-h-screen bg-background p-4 md:p-8">
         <div className="max-w-6xl mx-auto">
-          <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
-            <p className="text-red-800 dark:text-red-200">Project not found</p>
-          </div>
+          <Card className="border-dashed">
+            <CardContent className="flex flex-col items-center justify-center py-16">
+              <div className="text-center max-w-md">
+                <div className="bg-destructive/10 rounded-full p-4 mb-4 mx-auto w-fit">
+                  <Trash2 className="size-8 text-destructive" />
+                </div>
+                <h3 className="text-lg font-semibold mb-2">Project not found</h3>
+                <p className="text-muted-foreground mb-6">
+                  This project may have been deleted or you don&apos;t have permission to view it.
+                </p>
+                <Button onClick={() => router.push('/dashboard/projects')}>Go to Projects</Button>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </div>
     );
@@ -97,6 +123,7 @@ export default function ProjectTasksPage() {
             members={members?.map((m) => m.profile) || []}
             onFilterChange={setFilters}
             onSortChange={setSort}
+            onStatusToggle={handleStatusToggle}
           />
         )}
       </div>

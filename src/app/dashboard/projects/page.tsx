@@ -8,6 +8,7 @@ import {
 } from '@/features/projects/hooks/useProjects';
 import { ProjectCard } from '@/features/projects/components/ProjectCard';
 import { CreateProjectDialog } from '@/features/projects/components/CreateProjectDialog';
+import { EditProjectDialog } from '@/features/projects/components/EditProjectDialog';
 import { useWorkspaceStore } from '@/features/workspace/store';
 import { useRouter } from 'next/navigation';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -16,6 +17,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { ArrowLeft } from 'lucide-react';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { useState } from 'react';
+import type { Project } from '@/features/projects/types';
 
 export default function ProjectsPage() {
   const currentWorkspace = useWorkspaceStore((state) => state.currentWorkspace);
@@ -30,14 +32,19 @@ export default function ProjectsPage() {
   const [projectToArchive, setProjectToArchive] = useState<string | null>(null);
   const [activateDialogOpen, setActivateDialogOpen] = useState(false);
   const [projectToActivate, setProjectToActivate] = useState<string | null>(null);
+  const [editingProject, setEditingProject] = useState<Project | null>(null);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
 
   const handleViewProject = (projectId: string) => {
     router.push(`/dashboard/projects/${projectId}`);
   };
 
   const handleEditProject = (projectId: string) => {
-    // TODO: Open edit dialog
-    console.log('Edit project:', projectId);
+    const project = projects?.find((p) => p.id === projectId);
+    if (project) {
+      setEditingProject(project);
+      setEditDialogOpen(true);
+    }
   };
 
   const handleArchiveProject = (projectId: string) => {
@@ -254,6 +261,14 @@ export default function ProjectsPage() {
         confirmText="Activate"
         variant="default"
       />
+
+      {editingProject && (
+        <EditProjectDialog
+          open={editDialogOpen}
+          onOpenChange={setEditDialogOpen}
+          project={editingProject}
+        />
+      )}
     </div>
   );
 }

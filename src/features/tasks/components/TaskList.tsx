@@ -33,6 +33,7 @@ interface TaskListProps {
   members?: Array<{ id: string; username: string; avatar_url: string | null }>;
   onFilterChange?: (filters: TaskFilters) => void;
   onSortChange?: (sort: TaskSortOptions) => void;
+  onStatusToggle?: (id: string) => void;
 }
 
 export function TaskList({
@@ -46,6 +47,7 @@ export function TaskList({
   members = [],
   onFilterChange,
   onSortChange,
+  onStatusToggle,
 }: TaskListProps) {
   const [showForm, setShowForm] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
@@ -150,6 +152,7 @@ export function TaskList({
               onView={onViewTask}
               onEdit={onEditTask}
               canEdit={canEdit}
+              onStatusToggle={onStatusToggle}
             />
           ))}
         </div>

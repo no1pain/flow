@@ -19,6 +19,7 @@ import { TaskStatus, TaskPriority, TaskUpdate, type TaskWithDetails } from '../t
 import { calculateNewPosition } from '../utils/position';
 import { KanbanColumn } from './KanbanColumn';
 import { KanbanTaskCard } from './KanbanTaskCard';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 
 interface KanbanBoardProps {
   projectId: string;
@@ -52,6 +53,8 @@ export function KanbanBoard({ projectId }: KanbanBoardProps) {
   );
 
   const [activeTask, setActiveTask] = useState<TaskWithDetails | null>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [taskToDelete, setTaskToDelete] = useState<string | null>(null);
 
   // Group tasks by status
   const tasksByStatus = tasks?.reduce(
@@ -166,9 +169,38 @@ export function KanbanBoard({ projectId }: KanbanBoardProps) {
   };
 
   const handleDeleteTask = (taskId: string) => {
-    if (confirm('Are you sure you want to delete this task?')) {
-      deleteTask.mutate(taskId);
+    setTaskToDelete(taskId);
+    setDeleteDialogOpen(true);
+  };
+
+  const confirmDeleteTask = () => {
+    if (taskToDelete) {
+      deleteTask.mutate(taskToDelete);
+      setTaskToDelete(null);
     }
+  };
+
+  const handleStatusToggle = (taskId: string) => {
+    const task = tasks?.find((t) => t.id === taskId);
+    if (!task) return;
+
+    const newStatus: TaskStatus = task.status === 'DONE' ? 'TODO' : 'DONE';
+
+    // Calculate new position based on target column
+    const targetColumnTasks = tasksByStatus[newStatus] || [];
+    const newPosition = calculateNewPosition(
+      targetColumnTasks.map((t) => ({ id: t.id, position: t.position || 0 })),
+      targetColumnTasks.length,
+      taskId
+    );
+
+    updateTask.mutate({
+      id: taskId,
+      updates: {
+        status: newStatus,
+        position: newPosition,
+      } as TaskUpdate & { position: number },
+    });
   };
 
   if (isLoading) {
@@ -235,6 +267,7 @@ export function KanbanBoard({ projectId }: KanbanBoardProps) {
               label={column.label}
               tasks={tasksByStatus[column.id] || []}
               onDeleteTask={handleDeleteTask}
+              onStatusToggle={handleStatusToggle}
             />
           ))}
         </div>
@@ -243,6 +276,17 @@ export function KanbanBoard({ projectId }: KanbanBoardProps) {
           {activeTask ? <KanbanTaskCard task={activeTask} isDragging /> : null}
         </DragOverlay>
       </DndContext>
+
+      <ConfirmDialog
+        open={deleteDialogOpen}
+        onOpenChange={setDeleteDialogOpen}
+        title="Delete Task"
+        description="Are you sure you want to delete this task? This action cannot be undone."
+        onConfirm={confirmDeleteTask}
+        cancelText="Cancel"
+        confirmText="Delete"
+        variant="destructive"
+      />
     </div>
   );
 }

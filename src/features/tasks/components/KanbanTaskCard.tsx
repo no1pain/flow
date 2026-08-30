@@ -35,6 +35,7 @@ interface KanbanTaskCardProps {
   task: TaskWithDetails;
   isDragging?: boolean;
   onDelete?: (taskId: string) => void;
+  onStatusToggle?: (taskId: string) => void;
 }
 
 const priorityConfig: Record<
@@ -56,7 +57,12 @@ const statusConfig: Record<
   DONE: { label: 'Done', color: 'default', icon: CheckCircle2 },
 };
 
-export function KanbanTaskCard({ task, isDragging = false, onDelete }: KanbanTaskCardProps) {
+export function KanbanTaskCard({
+  task,
+  isDragging = false,
+  onDelete,
+  onStatusToggle,
+}: KanbanTaskCardProps) {
   const {
     attributes,
     listeners,
@@ -81,6 +87,11 @@ export function KanbanTaskCard({ task, isDragging = false, onDelete }: KanbanTas
     onDelete?.(task.id);
   };
 
+  const handleStatusToggle = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onStatusToggle?.(task.id);
+  };
+
   return (
     <Card
       ref={setNodeRef}
@@ -101,7 +112,13 @@ export function KanbanTaskCard({ task, isDragging = false, onDelete }: KanbanTas
           </button>
           <div className="flex-1 min-w-0">
             <CardTitle className="text-base flex items-center gap-2">
-              <StatusIcon className="size-4 flex-shrink-0" />
+              <button
+                onClick={handleStatusToggle}
+                className="flex-shrink-0 hover:scale-110 transition-transform"
+                disabled={!onStatusToggle}
+              >
+                <StatusIcon className="size-4" />
+              </button>
               <span className="truncate">{task.title}</span>
             </CardTitle>
             {task.description && (

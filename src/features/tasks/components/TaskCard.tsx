@@ -1,3 +1,5 @@
+'use client';
+
 import {
   Card,
   CardHeader,
@@ -31,6 +33,7 @@ interface TaskCardProps {
   onView: (id: string) => void;
   onEdit?: (id: string) => void;
   canEdit?: boolean;
+  onStatusToggle?: (id: string) => void;
 }
 
 const priorityConfig = {
@@ -46,11 +49,16 @@ const statusConfig = {
   DONE: { label: 'Done', color: 'default', icon: CheckCircle2 },
 };
 
-export function TaskCard({ task, onView, onEdit, canEdit = false }: TaskCardProps) {
+export function TaskCard({ task, onView, onEdit, canEdit = false, onStatusToggle }: TaskCardProps) {
   const priority = priorityConfig[task.priority as TaskPriority];
   const status = statusConfig[task.status as TaskStatus];
   const StatusIcon = status.icon;
   const PriorityIcon = priority.icon;
+
+  const handleStatusToggle = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onStatusToggle?.(task.id);
+  };
 
   return (
     <Card
@@ -60,7 +68,13 @@ export function TaskCard({ task, onView, onEdit, canEdit = false }: TaskCardProp
       <CardHeader>
         <CardTitle className="flex items-center justify-between">
           <span className="flex items-center gap-2">
-            <StatusIcon className="size-4" />
+            <button
+              onClick={handleStatusToggle}
+              className="flex-shrink-0 hover:scale-110 transition-transform"
+              disabled={!onStatusToggle}
+            >
+              <StatusIcon className="size-4" />
+            </button>
             {task.title}
           </span>
           {canEdit && onEdit && (

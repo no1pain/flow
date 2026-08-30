@@ -10,6 +10,8 @@ import { DocumentEditor } from '@/features/documents/components/DocumentEditor';
 import { ShareDialog } from '@/features/documents/components/ShareDialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Card, CardContent } from '@/components/ui/card';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { ArrowLeft, Save, Trash2, Loader2 } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 
@@ -26,6 +28,7 @@ export default function DocumentDetailPage() {
   const [content, setContent] = useState<Record<string, unknown> | null>(null);
   const [showShareDialog, setShowShareDialog] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
   // Update state when document loads
   if (document && (title !== document.title || content !== document.content)) {
@@ -43,8 +46,13 @@ export default function DocumentDetailPage() {
     setHasUnsavedChanges(false);
   };
 
-  const handleDelete = async () => {
-    if (!document || !confirm('Are you sure you want to delete this document?')) return;
+  const handleDelete = () => {
+    if (!document) return;
+    setDeleteDialogOpen(true);
+  };
+
+  const confirmDeleteDocument = async () => {
+    if (!document) return;
 
     await deleteDocument.mutateAsync(document.id);
     router.push('/dashboard/documents');
@@ -76,12 +84,20 @@ export default function DocumentDetailPage() {
     return (
       <div className="min-h-screen bg-background p-4 md:p-8">
         <div className="max-w-6xl mx-auto">
-          <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
-            <p className="text-red-800 dark:text-red-200">Failed to load document</p>
-            <Button variant="link" onClick={() => router.push('/dashboard/documents')}>
-              Back to Documents
-            </Button>
-          </div>
+          <Card className="border-dashed">
+            <CardContent className="flex flex-col items-center justify-center py-16">
+              <div className="text-center max-w-md">
+                <div className="bg-destructive/10 rounded-full p-4 mb-4 mx-auto w-fit">
+                  <Trash2 className="size-8 text-destructive" />
+                </div>
+                <h3 className="text-lg font-semibold mb-2">Document not found</h3>
+                <p className="text-muted-foreground mb-6">
+                  This document may have been deleted or you don&apos;t have permission to view it.
+                </p>
+                <Button onClick={() => router.push('/dashboard/documents')}>Go to Documents</Button>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </div>
     );
@@ -145,6 +161,17 @@ export default function DocumentDetailPage() {
           />
         </div>
       </div>
+
+      <ConfirmDialog
+        open={deleteDialogOpen}
+        onOpenChange={setDeleteDialogOpen}
+        title="Delete Document"
+        description="Are you sure you want to delete this document? This action cannot be undone."
+        onConfirm={confirmDeleteDocument}
+        cancelText="Cancel"
+        confirmText="Delete"
+        variant="destructive"
+      />
     </div>
   );
 }

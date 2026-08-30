@@ -12,7 +12,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Users, Settings, ArrowLeft } from 'lucide-react';
+import { Users, Settings, ArrowLeft, Trash2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 export default function WorkspaceDetailPage() {
@@ -40,9 +40,22 @@ export default function WorkspaceDetailPage() {
     return (
       <div className="min-h-screen bg-background p-4 md:p-8">
         <div className="max-w-6xl mx-auto">
-          <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
-            <p className="text-red-800 dark:text-red-200">Workspace not found</p>
-          </div>
+          <Card className="border-dashed">
+            <CardContent className="flex flex-col items-center justify-center py-16">
+              <div className="text-center max-w-md">
+                <div className="bg-destructive/10 rounded-full p-4 mb-4 mx-auto w-fit">
+                  <Trash2 className="size-8 text-destructive" />
+                </div>
+                <h3 className="text-lg font-semibold mb-2">Workspace not found</h3>
+                <p className="text-muted-foreground mb-6">
+                  This workspace may have been deleted or you don&apos;t have permission to view it.
+                </p>
+                <Button onClick={() => router.push('/dashboard/workspaces')}>
+                  Go to Workspaces
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </div>
     );

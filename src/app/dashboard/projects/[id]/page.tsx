@@ -3,12 +3,21 @@
 import { useParams } from 'next/navigation';
 import { useProjectWithDetails, useProjectMembers } from '@/features/projects/hooks/useProjects';
 import { useWorkspaceStore } from '@/features/workspace/store';
-import { useTasks } from '@/features/tasks/hooks/useTasks';
+import { useTasks, useUpdateTask } from '@/features/tasks/hooks/useTasks';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { ArrowLeft, Settings, Archive, CheckCircle, FolderKanban, Plus, Users } from 'lucide-react';
+import {
+  ArrowLeft,
+  Settings,
+  Archive,
+  CheckCircle,
+  FolderKanban,
+  Plus,
+  Users,
+  Trash2,
+} from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { archiveProject, activateProject } from '@/features/projects/actions';
 import { AddMemberDialog } from '@/features/projects/components/AddMemberDialog';
@@ -16,7 +25,7 @@ import { ProjectMembersList } from '@/features/projects/components/ProjectMember
 import { TaskForm } from '@/features/tasks/components/TaskForm';
 import { TaskList } from '@/features/tasks/components/TaskList';
 import { createTask } from '@/features/tasks/actions';
-import type { TaskInsert } from '@/features/tasks/types';
+import type { TaskInsert, TaskStatus } from '@/features/tasks/types';
 import { useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 
@@ -33,6 +42,7 @@ export default function ProjectDetailPage() {
   const { data: project, isLoading, error } = useProjectWithDetails(projectId);
   const { data: members } = useProjectMembers(projectId);
   const { data: tasks, isLoading: tasksLoading } = useTasks(projectId);
+  const updateTask = useUpdateTask();
 
   const handleArchive = async () => {
     try {
@@ -73,6 +83,18 @@ export default function ProjectDetailPage() {
     // TODO: Open edit dialog
   };
 
+  const handleStatusToggle = (taskId: string) => {
+    const task = tasks?.find((t) => t.id === taskId);
+    if (!task) return;
+
+    const newStatus: TaskStatus = task.status === 'DONE' ? 'TODO' : 'DONE';
+
+    updateTask.mutate({
+      id: taskId,
+      updates: { status: newStatus },
+    });
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background p-4 md:p-8">
@@ -88,9 +110,20 @@ export default function ProjectDetailPage() {
     return (
       <div className="min-h-screen bg-background p-4 md:p-8">
         <div className="max-w-6xl mx-auto">
-          <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
-            <p className="text-red-800 dark:text-red-200">Project not found</p>
-          </div>
+          <Card className="border-dashed">
+            <CardContent className="flex flex-col items-center justify-center py-16">
+              <div className="text-center max-w-md">
+                <div className="bg-destructive/10 rounded-full p-4 mb-4 mx-auto w-fit">
+                  <Trash2 className="size-8 text-destructive" />
+                </div>
+                <h3 className="text-lg font-semibold mb-2">Project not found</h3>
+                <p className="text-muted-foreground mb-6">
+                  This project may have been deleted or you don&apos;t have permission to view it.
+                </p>
+                <Button onClick={() => router.push('/dashboard/projects')}>Go to Projects</Button>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </div>
     );
@@ -194,6 +227,7 @@ export default function ProjectDetailPage() {
                         avatar_url: m.profile?.avatar_url,
                       })) || []
                     }
+                    onStatusToggle={handleStatusToggle}
                   />
                 ) : (
                   <div className="text-center py-8 text-slate-500 dark:text-slate-400">

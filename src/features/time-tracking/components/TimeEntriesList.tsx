@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { Trash2, Edit2 } from 'lucide-react';
 import { useTimeEntries, useDeleteTimeEntry } from '../hooks/useTimeTracking';
 import { useWorkspaceStore } from '@/features/workspace/store';
@@ -22,6 +23,8 @@ export function TimeEntriesList() {
 
   const [editingEntry, setEditingEntry] = useState<string | null>(null);
   const [editDescription, setEditDescription] = useState('');
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [entryToDelete, setEntryToDelete] = useState<string | null>(null);
 
   const handleEdit = (entryId: string, currentDescription: string) => {
     setEditingEntry(entryId);
@@ -42,14 +45,20 @@ export function TimeEntriesList() {
     setEditDescription('');
   };
 
-  const handleDelete = async (entryId: string) => {
-    if (!confirm('Are you sure you want to delete this time entry?')) return;
+  const handleDelete = (entryId: string) => {
+    setEntryToDelete(entryId);
+    setDeleteDialogOpen(true);
+  };
+
+  const confirmDeleteEntry = async () => {
+    if (!entryToDelete || !user?.id || !currentWorkspace?.id) return;
 
     await deleteTimeEntry.mutateAsync({
-      entryId,
-      userId: user?.id || '',
-      workspaceId: currentWorkspace?.id || '',
+      entryId: entryToDelete,
+      userId: user.id,
+      workspaceId: currentWorkspace.id,
     });
+    setEntryToDelete(null);
   };
 
   if (isLoading) {
@@ -160,6 +169,17 @@ export function TimeEntriesList() {
           </CardContent>
         </Card>
       ))}
+
+      <ConfirmDialog
+        open={deleteDialogOpen}
+        onOpenChange={setDeleteDialogOpen}
+        title="Delete Time Entry"
+        description="Are you sure you want to delete this time entry? This action cannot be undone."
+        onConfirm={confirmDeleteEntry}
+        cancelText="Cancel"
+        confirmText="Delete"
+        variant="destructive"
+      />
     </div>
   );
 }

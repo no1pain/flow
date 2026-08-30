@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { Bell } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -22,6 +23,7 @@ interface NotificationBellProps {
 }
 
 export function NotificationBell({ userId }: NotificationBellProps) {
+  const router = useRouter();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [isOpen, setIsOpen] = useState(false);
@@ -135,6 +137,13 @@ export function NotificationBell({ userId }: NotificationBellProps) {
     }
   };
 
+  const handleNotificationClick = (notification: Notification) => {
+    const link = getNotificationLink(notification);
+    if (link !== '#') {
+      router.push(link);
+    }
+  };
+
   return (
     <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
       <DropdownMenuTrigger
@@ -180,7 +189,7 @@ export function NotificationBell({ userId }: NotificationBellProps) {
                 if (!notification.is_read) {
                   handleMarkAsRead(notification.id);
                 }
-                window.location.href = getNotificationLink(notification);
+                handleNotificationClick(notification);
               }}
             >
               <div className="flex items-start gap-2 w-full">
