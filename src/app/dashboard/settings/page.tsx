@@ -1,11 +1,20 @@
 'use client';
 
-import { useWorkspaceStore } from '@/features/workspace/store';
-import { Card, CardContent } from '@/components/ui/card';
-import { Settings as SettingsIcon, Clock } from 'lucide-react';
+import { useState } from 'react';
+import { useAuth } from '@/features/auth/hooks/useAuth';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Avatar } from '@/components/ui/avatar';
+import { User, Mail, Edit } from 'lucide-react';
+import { EditProfileDialog } from './components/EditProfileDialog';
 
 export default function SettingsPage() {
-  const currentWorkspace = useWorkspaceStore((state) => state.currentWorkspace);
+  const { user } = useAuth();
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+
+  const username = user?.user_metadata?.username || 'Not set';
+  const email = user?.email || 'Not set';
+  const avatarUrl = user?.user_metadata?.avatar_url;
 
   return (
     <div className="min-h-screen bg-background p-4 md:p-8">
@@ -13,28 +22,54 @@ export default function SettingsPage() {
         <div className="flex items-center justify-between mb-8">
           <div>
             <h1 className="text-3xl font-bold">Settings</h1>
-            <p className="text-muted-foreground">{currentWorkspace?.name}</p>
+            <p className="text-muted-foreground">Manage your account profile</p>
           </div>
         </div>
 
-        <Card className="border-dashed">
-          <CardContent className="flex flex-col items-center justify-center py-16">
-            <div className="text-center max-w-md">
-              <div className="bg-primary/10 rounded-full p-4 mb-4 mx-auto w-fit">
-                <SettingsIcon className="size-8 text-primary" />
+        <div className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Profile Information</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="flex items-start gap-6">
+                <Avatar className="h-20 w-20">
+                  {avatarUrl ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={avatarUrl} alt={username} className="h-full w-full object-cover" />
+                  ) : (
+                    <div className="flex h-full w-full items-center justify-center bg-primary text-primary-foreground font-medium text-2xl">
+                      {username.charAt(0).toUpperCase()}
+                    </div>
+                  )}
+                </Avatar>
+                <div className="flex-1 space-y-4">
+                  <div className="flex items-center gap-3">
+                    <User className="h-5 w-5 text-muted-foreground" />
+                    <div>
+                      <p className="text-sm text-muted-foreground">Username</p>
+                      <p className="font-medium">{username}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <Mail className="h-5 w-5 text-muted-foreground" />
+                    <div>
+                      <p className="text-sm text-muted-foreground">Email</p>
+                      <p className="font-medium">{email}</p>
+                    </div>
+                  </div>
+                </div>
+                <Button onClick={() => setEditDialogOpen(true)} className="gap-2">
+                  <Edit className="h-4 w-4" />
+                  Edit Profile
+                </Button>
               </div>
-              <h3 className="text-xl font-semibold mb-2">Coming Soon</h3>
-              <p className="text-muted-foreground mb-6">
-                Settings and configuration options will be available here in the future.
-              </p>
-              <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
-                <Clock className="size-4" />
-                <span>Stay tuned for updates</span>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        </div>
       </div>
+
+      <EditProfileDialog open={editDialogOpen} onOpenChange={setEditDialogOpen} user={user} />
     </div>
   );
 }

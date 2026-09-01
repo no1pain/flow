@@ -3,7 +3,7 @@
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
-import { loginSchema, registerSchema } from '@/lib/validations/auth';
+import { loginSchema, registerSchema, updateProfileSchema } from '@/lib/validations/auth';
 
 export async function login(formData: FormData) {
   const supabase = await createClient();
@@ -89,4 +89,54 @@ export async function logout() {
   await supabase.auth.signOut();
   revalidatePath('/', 'layout');
   redirect('/login');
+}
+
+export async function updateProfile(formData: FormData) {
+  const supabase = await createClient();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) {
+    return {
+      error: 'User not authenticated',
+    };
+  }
+
+  const data = {
+    username: formData.get('username') as string,
+    avatar_url: formData.get('avatar_url') as string,
+  };
+
+  const validatedFields = updateProfileSchema.safeParse(data);
+
+  if (!validatedFields.success) {
+    return {
+      error: 'Invalid profile data',
+      fields: validatedFields.error.flatten().fieldErrors,
+    };
+  }
+
+  const updates: { username?: string; avatar_url?: string } = {};
+  if (validatedFields.data.username) {
+    updates.username = validatedFields.data.username;
+  }
+  if (validatedFields.data.avatar_url) {
+    updates.avatar_url = validatedFields.data.avatar_url;
+  }
+
+  const { error } = await supabase.auth.updateUser({
+    data: updates,
+  });
+
+  if (error) {
+    return {
+      error: error.message,
+    };
+  }
+
+  revalidatePath('/dashboard/settings', 'page');
+  return {
+    success: true,
+  };
 }
