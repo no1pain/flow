@@ -2,18 +2,25 @@
 
 import { useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { useTasksWithDetails, useUpdateTask } from '@/features/tasks/hooks/useTasks';
+import { useTasksWithDetails } from '@/features/tasks/hooks/useTasks';
 import { useProjectWithDetails } from '@/features/projects/hooks/useProjects';
 import { useWorkspaceStore } from '@/features/workspace/store';
 import { TaskList } from '@/features/tasks/components/TaskList';
-import { createTask } from '@/features/tasks/actions';
-import type { TaskStatus } from '@/features/tasks/types';
+import { TaskForm } from '@/features/tasks/components/TaskForm';
+import { createTask, updateTask } from '@/features/tasks/actions';
+import type {
+  TaskFilters,
+  TaskSortOptions,
+  TaskInsert,
+  TaskStatus,
+  TaskPriority,
+} from '@/features/tasks/types';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { ArrowLeft, FolderKanban, Trash2 } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useProjectMembers } from '@/features/projects/hooks/useProjects';
-import type { TaskFilters, TaskSortOptions, TaskInsert } from '@/features/tasks/types';
+import { useQueryClient } from '@tanstack/react-query';
 
 export default function ProjectTasksPage() {
   const params = useParams();
@@ -23,30 +30,74 @@ export default function ProjectTasksPage() {
 
   const [filters, setFilters] = useState<TaskFilters>({});
   const [sort, setSort] = useState<TaskSortOptions>({ field: 'created_at', order: 'desc' });
+  const [addTaskOpen, setAddTaskOpen] = useState(false);
+  const [editTaskOpen, setEditTaskOpen] = useState(false);
+  const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
+  const [isSubmittingTask, setIsSubmittingTask] = useState(false);
+  const [isUpdatingTask, setIsUpdatingTask] = useState(false);
+  const queryClient = useQueryClient();
 
   const { data: project, isLoading: projectLoading } = useProjectWithDetails(projectId);
   const { data: tasks, isLoading: tasksLoading } = useTasksWithDetails(projectId, filters, sort);
   const { data: members } = useProjectMembers(projectId);
-  const updateTask = useUpdateTask();
 
   const handleCreateTask = async (data: TaskInsert) => {
-    await createTask(data);
+    setIsSubmittingTask(true);
+    try {
+      await createTask(data);
+      queryClient.invalidateQueries({ queryKey: ['tasks', projectId] });
+      setAddTaskOpen(false);
+    } catch (error) {
+      console.error('Failed to create task:', error);
+    } finally {
+      setIsSubmittingTask(false);
+    }
+  };
+
+  const handleEditTask = (taskId: string) => {
+    const task = tasks?.find((t) => t.id === taskId);
+    if (!task) return;
+    setEditingTaskId(taskId);
+    setEditTaskOpen(true);
+  };
+
+  const handleUpdateTask = async (data: TaskInsert) => {
+    if (!editingTaskId) return;
+    setIsUpdatingTask(true);
+    try {
+      await updateTask(editingTaskId, {
+        title: data.title,
+        description: data.description,
+        status: data.status,
+        priority: data.priority,
+        assignee_id: data.assignee_id,
+      });
+      queryClient.invalidateQueries({ queryKey: ['tasks', projectId] });
+      setEditTaskOpen(false);
+      setEditingTaskId(null);
+    } catch (error) {
+      console.error('Failed to update task:', error);
+    } finally {
+      setIsUpdatingTask(false);
+    }
   };
 
   const handleViewTask = (taskId: string) => {
     router.push(`/dashboard/tasks/${taskId}`);
   };
 
-  const handleStatusToggle = (taskId: string) => {
+  const handleStatusToggle = async (taskId: string) => {
     const task = tasks?.find((t) => t.id === taskId);
     if (!task) return;
 
     const newStatus: TaskStatus = task.status === 'DONE' ? 'TODO' : 'DONE';
 
-    updateTask.mutate({
-      id: taskId,
-      updates: { status: newStatus },
-    });
+    try {
+      await updateTask(taskId, { status: newStatus });
+      queryClient.invalidateQueries({ queryKey: ['tasks', projectId] });
+    } catch (error) {
+      console.error('Failed to update task status:', error);
+    }
   };
 
   if (projectLoading) {
@@ -118,6 +169,7 @@ export default function ProjectTasksPage() {
             loading={tasksLoading}
             onViewTask={handleViewTask}
             onCreateTask={handleCreateTask}
+            onEditTask={handleEditTask}
             canEdit={true}
             projectId={projectId}
             members={members?.map((m) => m.profile) || []}
@@ -127,6 +179,39 @@ export default function ProjectTasksPage() {
           />
         )}
       </div>
+
+      <TaskForm
+        open={addTaskOpen}
+        onClose={() => setAddTaskOpen(false)}
+        onSubmit={handleCreateTask}
+        projectId={projectId}
+        members={members?.map((m) => m.profile) || []}
+        isSubmitting={isSubmittingTask}
+      />
+      {editingTaskId &&
+        (() => {
+          const task = tasks?.find((t) => t.id === editingTaskId);
+          return task ? (
+            <TaskForm
+              open={editTaskOpen}
+              onClose={() => {
+                setEditTaskOpen(false);
+                setEditingTaskId(null);
+              }}
+              onSubmit={handleUpdateTask}
+              initialData={{
+                title: task.title,
+                description: task.description || undefined,
+                status: task.status as TaskStatus,
+                priority: task.priority as TaskPriority,
+                assignee_id: task.assignee_id || undefined,
+              }}
+              projectId={projectId}
+              members={members?.map((m) => m.profile) || []}
+              isSubmitting={isUpdatingTask}
+            />
+          ) : null;
+        })()}
     </div>
   );
 }

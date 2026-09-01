@@ -12,7 +12,6 @@ import {
 } from '@/components/ui/select';
 import { Plus, Search, Filter } from 'lucide-react';
 import { TaskCard } from './TaskCard';
-import { TaskForm } from './TaskForm';
 import type {
   TaskWithDetails,
   TaskFilters,
@@ -26,10 +25,10 @@ interface TaskListProps {
   tasks: TaskWithDetails[];
   loading?: boolean;
   onViewTask: (id: string) => void;
-  onCreateTask: (data: TaskInsert) => Promise<void>;
+  onCreateTask?: (data: TaskInsert) => Promise<void>;
   onEditTask?: (id: string) => void;
   canEdit?: boolean;
-  projectId: string;
+  projectId?: string;
   members?: Array<{ id: string; username: string; avatar_url: string | null }>;
   onFilterChange?: (filters: TaskFilters) => void;
   onSortChange?: (sort: TaskSortOptions) => void;
@@ -43,7 +42,7 @@ export function TaskList({
   onCreateTask,
   onEditTask,
   canEdit = false,
-  projectId,
+  projectId = '',
   members = [],
   onFilterChange,
   onSortChange,
@@ -129,7 +128,7 @@ export function TaskList({
             <Filter className="h-4 w-4" />
           </Button>
         </div>
-        {canEdit && (
+        {canEdit && onCreateTask && (
           <Button onClick={() => setShowForm(true)}>
             <Plus className="h-4 w-4 mr-2" />
             Add Task
@@ -156,16 +155,6 @@ export function TaskList({
             />
           ))}
         </div>
-      )}
-
-      {showForm && (
-        <TaskForm
-          open={showForm}
-          onClose={() => setShowForm(false)}
-          onSubmit={onCreateTask}
-          projectId={projectId}
-          members={members}
-        />
       )}
     </div>
   );

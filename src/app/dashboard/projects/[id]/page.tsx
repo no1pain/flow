@@ -3,7 +3,7 @@
 import { useParams } from 'next/navigation';
 import { useProjectWithDetails, useProjectMembers } from '@/features/projects/hooks/useProjects';
 import { useWorkspaceStore } from '@/features/workspace/store';
-import { useTasks, useUpdateTask } from '@/features/tasks/hooks/useTasks';
+import { useTasks } from '@/features/tasks/hooks/useTasks';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -24,8 +24,8 @@ import { AddMemberDialog } from '@/features/projects/components/AddMemberDialog'
 import { ProjectMembersList } from '@/features/projects/components/ProjectMembersList';
 import { TaskForm } from '@/features/tasks/components/TaskForm';
 import { TaskList } from '@/features/tasks/components/TaskList';
-import { createTask } from '@/features/tasks/actions';
-import type { TaskInsert, TaskStatus } from '@/features/tasks/types';
+import { createTask, updateTask } from '@/features/tasks/actions';
+import type { TaskInsert, TaskStatus, TaskPriority } from '@/features/tasks/types';
 import { useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 
@@ -38,11 +38,13 @@ export default function ProjectDetailPage() {
   const [addMemberOpen, setAddMemberOpen] = useState(false);
   const [addTaskOpen, setAddTaskOpen] = useState(false);
   const [isSubmittingTask, setIsSubmittingTask] = useState(false);
+  const [editTaskOpen, setEditTaskOpen] = useState(false);
+  const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
+  const [isUpdatingTask, setIsUpdatingTask] = useState(false);
 
   const { data: project, isLoading, error } = useProjectWithDetails(projectId);
   const { data: members } = useProjectMembers(projectId);
   const { data: tasks, isLoading: tasksLoading } = useTasks(projectId);
-  const updateTask = useUpdateTask();
 
   const handleArchive = async () => {
     try {
@@ -79,20 +81,47 @@ export default function ProjectDetailPage() {
   };
 
   const handleEditTask = (taskId: string) => {
-    console.log('Edit task:', taskId);
-    // TODO: Open edit dialog
+    const task = tasks?.find((t) => t.id === taskId);
+    if (!task) return;
+    setEditingTaskId(taskId);
+    setEditTaskOpen(true);
   };
 
-  const handleStatusToggle = (taskId: string) => {
+  const handleUpdateTask = async (data: TaskInsert) => {
+    if (!editingTaskId) return;
+    setIsUpdatingTask(true);
+    try {
+      await updateTask(editingTaskId, {
+        title: data.title,
+        description: data.description,
+        status: data.status,
+        priority: data.priority,
+        assignee_id: data.assignee_id,
+      });
+      queryClient.invalidateQueries({ queryKey: ['project', projectId, 'with-details'] });
+      queryClient.invalidateQueries({ queryKey: ['tasks', projectId] });
+      setEditTaskOpen(false);
+      setEditingTaskId(null);
+    } catch (error) {
+      console.error('Failed to update task:', error);
+    } finally {
+      setIsUpdatingTask(false);
+    }
+  };
+
+  const handleStatusToggle = async (taskId: string) => {
     const task = tasks?.find((t) => t.id === taskId);
     if (!task) return;
 
     const newStatus: TaskStatus = task.status === 'DONE' ? 'TODO' : 'DONE';
 
-    updateTask.mutate({
-      id: taskId,
-      updates: { status: newStatus },
-    });
+    try {
+      await updateTask(taskId, { status: newStatus });
+      queryClient.invalidateQueries({ queryKey: ['project', projectId, 'with-details'] });
+      queryClient.invalidateQueries({ queryKey: ['tasks', projectId] });
+    } catch (error) {
+      console.error('Failed to update task status:', error);
+    }
   };
 
   if (isLoading) {
@@ -339,6 +368,36 @@ export default function ProjectDetailPage() {
         }
         isSubmitting={isSubmittingTask}
       />
+      {editingTaskId &&
+        (() => {
+          const task = tasks?.find((t) => t.id === editingTaskId);
+          return task ? (
+            <TaskForm
+              open={editTaskOpen}
+              onClose={() => {
+                setEditTaskOpen(false);
+                setEditingTaskId(null);
+              }}
+              onSubmit={handleUpdateTask}
+              initialData={{
+                title: task.title,
+                description: task.description || undefined,
+                status: task.status as TaskStatus,
+                priority: task.priority as TaskPriority,
+                assignee_id: task.assignee_id || undefined,
+              }}
+              projectId={projectId}
+              members={
+                members?.map((m) => ({
+                  id: m.user_id,
+                  username: m.profile?.username || 'Unknown',
+                  avatar_url: m.profile?.avatar_url,
+                })) || []
+              }
+              isSubmitting={isUpdatingTask}
+            />
+          ) : null;
+        })()}
     </div>
   );
 }
