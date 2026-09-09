@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -32,6 +32,22 @@ export function AddMemberDialog({
   const [selectedUser, setSelectedUser] = useState<UserProfile | null>(null);
   const [role, setRole] = useState<ProjectMemberRole>('MEMBER');
   const [isPending, setIsPending] = useState(false);
+
+  useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && open) {
+        onOpenChange(false);
+      }
+    };
+
+    if (open) {
+      document.addEventListener('keydown', handleEscape);
+    }
+
+    return () => {
+      document.removeEventListener('keydown', handleEscape);
+    };
+  }, [open, onOpenChange]);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
