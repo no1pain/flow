@@ -103,6 +103,7 @@ export function InviteMemberDialog({
                 onChange={setSelectedUser}
                 excludeIds={existingMemberIds}
                 placeholder="Search users by username..."
+                disabled={addMember.isPending}
               />
             </div>
             <div className="space-y-2">
@@ -112,8 +113,10 @@ export function InviteMemberDialog({
                   <Badge
                     key={r.value}
                     variant={role === r.value ? 'default' : 'outline'}
-                    className="cursor-pointer"
-                    onClick={() => setRole(r.value)}
+                    className={
+                      addMember.isPending ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'
+                    }
+                    onClick={() => !addMember.isPending && setRole(r.value)}
                   >
                     {r.label}
                   </Badge>
