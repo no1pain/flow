@@ -353,7 +353,12 @@ export default function ProjectDetailPage() {
         </div>
       </div>
 
-      <AddMemberDialog projectId={projectId} open={addMemberOpen} onOpenChange={setAddMemberOpen} />
+      <AddMemberDialog
+        projectId={projectId}
+        open={addMemberOpen}
+        onOpenChange={setAddMemberOpen}
+        existingMemberIds={members?.map((m) => m.user_id) || []}
+      />
       <TaskForm
         open={addTaskOpen}
         onClose={() => setAddTaskOpen(false)}

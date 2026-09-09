@@ -10,36 +10,41 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { UserSelector } from '@/components/ui/user-selector';
 import { addProjectMember } from '../actions';
 import type { ProjectMemberRole } from '../types';
+import type { UserProfile } from '@/features/auth/services';
 
 interface AddMemberDialogProps {
   projectId: string;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  existingMemberIds?: string[];
 }
 
-export function AddMemberDialog({ projectId, open, onOpenChange }: AddMemberDialogProps) {
-  const [email, setEmail] = useState('');
+export function AddMemberDialog({
+  projectId,
+  open,
+  onOpenChange,
+  existingMemberIds = [],
+}: AddMemberDialogProps) {
+  const [selectedUser, setSelectedUser] = useState<UserProfile | null>(null);
   const [role, setRole] = useState<ProjectMemberRole>('MEMBER');
   const [isPending, setIsPending] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!email.trim()) return;
+    if (!selectedUser) return;
 
     setIsPending(true);
     try {
-      // In a real app, you'd look up the user ID from email
-      // For now, we'll use a placeholder - this needs to be implemented properly
       await addProjectMember({
         project_id: projectId,
-        user_id: email, // This should be the actual user ID
+        user_id: selectedUser.id,
         role,
       });
-      setEmail('');
+      setSelectedUser(null);
       setRole('MEMBER');
       onOpenChange(false);
     } catch (error) {
@@ -54,21 +59,17 @@ export function AddMemberDialog({ projectId, open, onOpenChange }: AddMemberDial
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Add Team Member</DialogTitle>
-          <DialogDescription>
-            Invite a team member to this project by their email address.
-          </DialogDescription>
+          <DialogDescription>Select a user to add to this project.</DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit}>
           <div className="space-y-4 py-4">
             <div className="space-y-2">
-              <Label htmlFor="email">Email Address</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="user@example.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
+              <Label>Select User</Label>
+              <UserSelector
+                value={selectedUser}
+                onChange={setSelectedUser}
+                excludeIds={existingMemberIds}
+                placeholder="Search users by username..."
               />
             </div>
             <div className="space-y-2">
@@ -89,7 +90,7 @@ export function AddMemberDialog({ projectId, open, onOpenChange }: AddMemberDial
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               Cancel
             </Button>
-            <Button type="submit" disabled={isPending}>
+            <Button type="submit" disabled={isPending || !selectedUser}>
               {isPending ? 'Adding...' : 'Add Member'}
             </Button>
           </DialogFooter>

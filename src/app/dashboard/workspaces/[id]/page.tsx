@@ -3,11 +3,10 @@
 import { useParams } from 'next/navigation';
 import { useWorkspaceWithMembers } from '@/features/workspace/hooks/useWorkspaces';
 import { useWorkspaceMembers } from '@/features/workspace/hooks/useWorkspaceMembers';
-import { useWorkspaceInvitations } from '@/features/workspace/hooks/useWorkspaceInvitations';
 import { useProjectsWithDetails } from '@/features/projects/hooks/useProjects';
 import { InviteMemberDialog } from '@/features/workspace/components/InviteMemberDialog';
 import { Avatar } from '@/components/ui/avatar';
-import type { WorkspaceMember, WorkspaceInvitationWithDetails } from '@/features/workspace/types';
+import type { WorkspaceMember } from '@/features/workspace/types';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
@@ -22,7 +21,6 @@ export default function WorkspaceDetailPage() {
 
   const { data: workspace, isLoading: workspaceLoading } = useWorkspaceWithMembers(workspaceId);
   const { data: members, isLoading: membersLoading } = useWorkspaceMembers(workspaceId);
-  const { data: invitations } = useWorkspaceInvitations(workspaceId);
   const { data: projects } = useProjectsWithDetails(workspaceId);
 
   if (workspaceLoading || membersLoading) {
@@ -164,7 +162,10 @@ export default function WorkspaceDetailPage() {
                     </CardTitle>
                     <CardDescription>Workspace team members</CardDescription>
                   </div>
-                  <InviteMemberDialog workspaceId={workspaceId} />
+                  <InviteMemberDialog
+                    workspaceId={workspaceId}
+                    existingMemberIds={members?.map((m) => m.user_id) || []}
+                  />
                 </div>
               </CardHeader>
               <CardContent>
@@ -196,35 +197,6 @@ export default function WorkspaceDetailPage() {
                 </div>
               </CardContent>
             </Card>
-
-            {invitations && invitations.length > 0 && (
-              <Card>
-                <CardHeader>
-                  <CardTitle>Pending Invitations</CardTitle>
-                  <CardDescription>Invitations waiting for response</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-3">
-                    {invitations.map((invitation: WorkspaceInvitationWithDetails) => (
-                      <div
-                        key={invitation.id}
-                        className="flex items-center justify-between text-sm"
-                      >
-                        <div>
-                          <p className="font-medium">{invitation.email}</p>
-                          <p className="text-xs text-slate-500 dark:text-slate-400">
-                            {invitation.role}
-                          </p>
-                        </div>
-                        <Badge variant="outline" className="text-xs">
-                          Pending
-                        </Badge>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            )}
           </div>
         </div>
       </div>

@@ -11,17 +11,18 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { UserPlus } from 'lucide-react';
-import { useCreateInvitation } from '../hooks/useWorkspaceInvitations';
-import { useAuth } from '@/features/auth/hooks/useAuth';
+import { useAddWorkspaceMember } from '../hooks/useWorkspaceMembers';
+import { UserSelector } from '@/components/ui/user-selector';
+import type { UserProfile } from '@/features/auth/services';
 import { cn } from '@/lib/utils';
 
 interface InviteMemberDialogProps {
   workspaceId: string;
   trigger?: React.ReactNode;
+  existingMemberIds?: string[];
 }
 
 const roles: { value: 'ADMIN' | 'MEMBER' | 'GUEST'; label: string }[] = [
@@ -30,29 +31,31 @@ const roles: { value: 'ADMIN' | 'MEMBER' | 'GUEST'; label: string }[] = [
   { value: 'GUEST', label: 'Guest' },
 ];
 
-export function InviteMemberDialog({ workspaceId, trigger }: InviteMemberDialogProps) {
+export function InviteMemberDialog({
+  workspaceId,
+  trigger,
+  existingMemberIds = [],
+}: InviteMemberDialogProps) {
   const [open, setOpen] = useState(false);
-  const [email, setEmail] = useState('');
+  const [selectedUser, setSelectedUser] = useState<UserProfile | null>(null);
   const [role, setRole] = useState<'ADMIN' | 'MEMBER' | 'GUEST'>('MEMBER');
-  const createInvitation = useCreateInvitation();
-  const { user } = useAuth();
+  const addMember = useAddWorkspaceMember();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email.trim()) return;
+    if (!selectedUser) return;
 
     try {
-      await createInvitation.mutateAsync({
+      await addMember.mutateAsync({
         workspace_id: workspaceId,
-        email,
+        user_id: selectedUser.id,
         role,
-        invited_by: user?.id || '',
       });
-      setEmail('');
+      setSelectedUser(null);
       setRole('MEMBER');
       setOpen(false);
     } catch (error) {
-      console.error('Failed to create invitation:', error);
+      console.error('Failed to add member:', error);
     }
   };
 
@@ -72,20 +75,18 @@ export function InviteMemberDialog({ workspaceId, trigger }: InviteMemberDialogP
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Invite Member</DialogTitle>
-          <DialogDescription>Send an invitation to join this workspace.</DialogDescription>
+          <DialogTitle>Add Member</DialogTitle>
+          <DialogDescription>Select a user to add to this workspace.</DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit}>
           <div className="space-y-4 py-4">
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="colleague@example.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
+              <Label>Select User</Label>
+              <UserSelector
+                value={selectedUser}
+                onChange={setSelectedUser}
+                excludeIds={existingMemberIds}
+                placeholder="Search users by username..."
               />
             </div>
             <div className="space-y-2">
@@ -108,8 +109,8 @@ export function InviteMemberDialog({ workspaceId, trigger }: InviteMemberDialogP
             <Button type="button" variant="outline" onClick={() => setOpen(false)}>
               Cancel
             </Button>
-            <Button type="submit" disabled={createInvitation.isPending}>
-              {createInvitation.isPending ? 'Sending...' : 'Send Invitation'}
+            <Button type="submit" disabled={addMember.isPending || !selectedUser}>
+              {addMember.isPending ? 'Adding...' : 'Add Member'}
             </Button>
           </DialogFooter>
         </form>
