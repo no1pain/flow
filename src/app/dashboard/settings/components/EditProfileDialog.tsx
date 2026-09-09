@@ -82,6 +82,7 @@ export function EditProfileDialog({ open, onOpenChange, user }: EditProfileDialo
                 defaultValue={user?.user_metadata?.username || ''}
                 pattern="[a-zA-Z0-9_]+"
                 title="Username can only contain letters, numbers, and underscores"
+                disabled={isSubmitting}
               />
               <p className="text-xs text-muted-foreground">
                 Must be at least 3 characters and can only contain letters, numbers, and underscores
@@ -95,6 +96,7 @@ export function EditProfileDialog({ open, onOpenChange, user }: EditProfileDialo
                 type="url"
                 placeholder="https://example.com/avatar.jpg"
                 defaultValue={user?.user_metadata?.avatar_url || ''}
+                disabled={isSubmitting}
               />
               <p className="text-xs text-muted-foreground">Enter a URL for your profile picture</p>
             </div>
