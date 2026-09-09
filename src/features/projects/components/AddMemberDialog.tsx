@@ -86,6 +86,7 @@ export function AddMemberDialog({
                 onChange={setSelectedUser}
                 excludeIds={existingMemberIds}
                 placeholder="Search users by username..."
+                disabled={isPending}
               />
             </div>
             <div className="space-y-2">
@@ -95,6 +96,7 @@ export function AddMemberDialog({
                 value={role}
                 onChange={(e) => setRole(e.target.value as ProjectMemberRole)}
                 className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                disabled={isPending}
               >
                 <option value="MEMBER">Member</option>
                 <option value="ADMIN">Admin</option>
