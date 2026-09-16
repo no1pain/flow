@@ -38,10 +38,21 @@ export function ProjectCard({
 }: ProjectCardProps) {
   const isActive = project.status === 'ACTIVE';
 
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      onView(project.id);
+    }
+  };
+
   return (
     <Card
-      className="hover:ring-2 hover:ring-ring/50 transition-all cursor-pointer"
+      className="hover:ring-2 hover:ring-ring/50 transition-all cursor-pointer focus:ring-2 focus:ring-ring/50 outline-none"
       onClick={() => onView(project.id)}
+      onKeyDown={handleKeyDown}
+      tabIndex={0}
+      role="button"
+      aria-label={`View project ${project.name}`}
     >
       <CardHeader>
         <CardTitle className="flex items-center justify-between">
