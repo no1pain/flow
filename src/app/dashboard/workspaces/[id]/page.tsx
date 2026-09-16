@@ -3,10 +3,11 @@
 import { useParams } from 'next/navigation';
 import { useWorkspaceWithMembers } from '@/features/workspace/hooks/useWorkspaces';
 import { useWorkspaceMembers } from '@/features/workspace/hooks/useWorkspaceMembers';
+import { useWorkspaceInvitations } from '@/features/workspace/hooks/useWorkspaceInvitations';
 import { useProjectsWithDetails } from '@/features/projects/hooks/useProjects';
 import { InviteMemberDialog } from '@/features/workspace/components/InviteMemberDialog';
 import { Avatar } from '@/components/ui/avatar';
-import type { WorkspaceMember } from '@/features/workspace/types';
+import type { WorkspaceMember, WorkspaceInvitationWithDetails } from '@/features/workspace/types';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
@@ -21,9 +22,10 @@ export default function WorkspaceDetailPage() {
 
   const { data: workspace, isLoading: workspaceLoading } = useWorkspaceWithMembers(workspaceId);
   const { data: members, isLoading: membersLoading } = useWorkspaceMembers(workspaceId);
+  const { data: invitations } = useWorkspaceInvitations(workspaceId);
   const { data: projects } = useProjectsWithDetails(workspaceId);
 
-  if (workspaceLoading || membersLoading) {
+  if (workspaceLoading) {
     return (
       <div className="min-h-screen bg-background p-4 md:p-8">
         <div className="max-w-6xl mx-auto">
@@ -169,34 +171,80 @@ export default function WorkspaceDetailPage() {
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="space-y-3">
-                  {members?.map(
-                    (member: WorkspaceMember & { profiles: { username: string | null } }) => (
-                      <div key={member.id} className="flex items-center justify-between">
+                {membersLoading ? (
+                  <div className="space-y-3">
+                    {[1, 2, 3].map((i) => (
+                      <div key={i} className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
-                          <Avatar className="size-8">
-                            <div className="size-full rounded-full bg-primary flex items-center justify-center text-primary-foreground text-sm font-medium">
-                              {member.profiles?.username?.[0]?.toUpperCase() || 'U'}
-                            </div>
-                          </Avatar>
-                          <div>
-                            <p className="font-medium text-sm">
-                              {member.profiles?.username || 'Unknown'}
-                            </p>
-                            <p className="text-xs text-slate-500 dark:text-slate-400">
-                              {member.profiles?.username || 'User'}
-                            </p>
+                          <Skeleton className="h-8 w-8 rounded-full" />
+                          <div className="flex-1">
+                            <Skeleton className="h-4 w-24 mb-2" />
+                            <Skeleton className="h-3 w-16" />
                           </div>
                         </div>
-                        <Badge variant="secondary" className="text-xs">
-                          {member.role}
-                        </Badge>
+                        <Skeleton className="h-6 w-16" />
                       </div>
-                    )
-                  )}
-                </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {members?.map(
+                      (member: WorkspaceMember & { profiles: { username: string | null } }) => (
+                        <div key={member.id} className="flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <Avatar className="size-8">
+                              <div className="size-full rounded-full bg-primary flex items-center justify-center text-primary-foreground text-sm font-medium">
+                                {member.profiles?.username?.[0]?.toUpperCase() || 'U'}
+                              </div>
+                            </Avatar>
+                            <div>
+                              <p className="font-medium text-sm">
+                                {member.profiles?.username || 'Unknown'}
+                              </p>
+                              <p className="text-xs text-slate-500 dark:text-slate-400">
+                                {member.profiles?.username || 'User'}
+                              </p>
+                            </div>
+                          </div>
+                          <Badge variant="secondary" className="text-xs">
+                            {member.role}
+                          </Badge>
+                        </div>
+                      )
+                    )}
+                  </div>
+                )}
               </CardContent>
             </Card>
+
+            {invitations && invitations.length > 0 && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Pending Invitations</CardTitle>
+                  <CardDescription>Invitations waiting for response</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    {invitations.map((invitation: WorkspaceInvitationWithDetails) => (
+                      <div
+                        key={invitation.id}
+                        className="flex items-center justify-between text-sm"
+                      >
+                        <div>
+                          <p className="font-medium">{invitation.email}</p>
+                          <p className="text-xs text-slate-500 dark:text-slate-400">
+                            {invitation.role}
+                          </p>
+                        </div>
+                        <Badge variant="outline" className="text-xs">
+                          Pending
+                        </Badge>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
           </div>
         </div>
       </div>
