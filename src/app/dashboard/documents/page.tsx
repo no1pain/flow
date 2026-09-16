@@ -11,7 +11,7 @@ import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
-import { ArrowLeft, Plus, Search, File, FolderPlus } from 'lucide-react';
+import { ArrowLeft, Plus, Search, File, FolderPlus, AlertCircle } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
 import {
@@ -44,23 +44,32 @@ export default function DocumentsPage() {
   const handleCreateDocument = async () => {
     if (!newDocTitle.trim() || !currentWorkspace) return;
 
-    await createDocument.mutateAsync({
-      workspace_id: currentWorkspace.id,
-      title: newDocTitle,
-      content: { type: 'doc', content: [] },
-      parent_id: isCreatingFolder ? null : selectedFolderId || null,
-      is_public: false,
-      shared_with: [],
-      created_by: '', // Will be set by RLS
-    });
+    try {
+      await createDocument.mutateAsync({
+        workspace_id: currentWorkspace.id,
+        title: newDocTitle,
+        content: { type: 'doc', content: [] },
+        parent_id: isCreatingFolder ? null : selectedFolderId || null,
+        is_public: false,
+        shared_with: [],
+        created_by: '', // Will be set by RLS
+      });
 
-    setNewDocTitle('');
-    setShowCreateDialog(false);
-    setIsCreatingFolder(false);
+      setNewDocTitle('');
+      setShowCreateDialog(false);
+      setIsCreatingFolder(false);
+    } catch (error) {
+      console.error('Failed to create document:', error);
+      // You could add a toast notification here for better user feedback
+    }
   };
 
   const handleDocumentClick = (document: { id: string }) => {
-    router.push(`/dashboard/documents/${document.id}`);
+    try {
+      router.push(`/dashboard/documents/${document.id}`);
+    } catch (error) {
+      console.error('Failed to navigate to document:', error);
+    }
   };
 
   if (!currentWorkspace) {
@@ -118,9 +127,20 @@ export default function DocumentsPage() {
     return (
       <div className="min-h-screen bg-background p-4 md:p-8">
         <div className="max-w-6xl mx-auto">
-          <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
-            <p className="text-red-800 dark:text-red-200">Failed to load documents</p>
-          </div>
+          <Card className="border-dashed border-destructive/50">
+            <CardContent className="flex flex-col items-center justify-center py-16">
+              <div className="text-center max-w-md">
+                <div className="bg-destructive/10 rounded-full p-4 mb-4 mx-auto w-fit">
+                  <AlertCircle className="size-8 text-destructive" />
+                </div>
+                <h3 className="text-lg font-semibold mb-2">Failed to load documents</h3>
+                <p className="text-muted-foreground mb-6">
+                  There was an error loading your documents. Please try again.
+                </p>
+                <Button onClick={() => window.location.reload()}>Reload Page</Button>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </div>
     );
