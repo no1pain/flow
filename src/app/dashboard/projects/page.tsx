@@ -66,9 +66,9 @@ export default function ProjectsPage() {
       if (taskCountFilter === 'none') {
         matchesTaskCount = !project.task_count || project.task_count === 0;
       } else if (taskCountFilter === 'some') {
-        matchesTaskCount = project.task_count && project.task_count > 0 && project.task_count < 10;
+        matchesTaskCount = (project.task_count ?? 0) > 0 && (project.task_count ?? 0) < 10;
       } else if (taskCountFilter === 'many') {
-        matchesTaskCount = project.task_count && project.task_count >= 10;
+        matchesTaskCount = (project.task_count ?? 0) >= 10;
       }
 
       return matchesSearch && matchesStatus && matchesTaskCount;
