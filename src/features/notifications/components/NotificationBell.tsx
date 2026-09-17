@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { Bell } from 'lucide-react';
+import { Bell, Volume2, VolumeX } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import {
@@ -22,11 +22,39 @@ interface NotificationBellProps {
   userId: string;
 }
 
+const playNotificationSound = () => {
+  try {
+    const AudioContextClass =
+      window.AudioContext ||
+      (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+    if (!AudioContextClass) return;
+    const audioContext = new AudioContextClass();
+    const oscillator = audioContext.createOscillator();
+    const gainNode = audioContext.createGain();
+
+    oscillator.connect(gainNode);
+    gainNode.connect(audioContext.destination);
+
+    oscillator.frequency.value = 800;
+    oscillator.type = 'sine';
+
+    gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+
+    oscillator.start(audioContext.currentTime);
+    oscillator.stop(audioContext.currentTime + 0.3);
+  } catch (error) {
+    console.error('Failed to play notification sound:', error);
+  }
+};
+
 export function NotificationBell({ userId }: NotificationBellProps) {
   const router = useRouter();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [isOpen, setIsOpen] = useState(false);
+  const [soundEnabled, setSoundEnabled] = useState(true);
+  const previousUnreadCount = useRef(0);
 
   useEffect(() => {
     if (!userId) return;
@@ -41,6 +69,7 @@ export function NotificationBell({ userId }: NotificationBellProps) {
         if (ignore) return;
         setNotifications(notifs);
         setUnreadCount(count.unread);
+        previousUnreadCount.current = count.unread;
       } catch (error) {
         console.error('Failed to load notifications:', error);
       }
@@ -56,16 +85,32 @@ export function NotificationBell({ userId }: NotificationBellProps) {
     const subscription = notificationService.subscribeToNotifications(userId, (payload) => {
       if (payload.eventType === 'INSERT') {
         setNotifications((prev) => [payload.new!, ...prev]);
-        setUnreadCount((prev) => prev + 1);
+        setUnreadCount((prev) => {
+          const newCount = prev + 1;
+          // Play sound for new notifications if enabled
+          if (soundEnabled && previousUnreadCount.current === 0) {
+            playNotificationSound();
+          }
+          previousUnreadCount.current = newCount;
+          return newCount;
+        });
       } else if (payload.eventType === 'UPDATE') {
         setNotifications((prev) => prev.map((n) => (n.id === payload.new?.id ? payload.new! : n)));
         if (payload.new?.is_read && !payload.old?.is_read) {
-          setUnreadCount((prev) => Math.max(0, prev - 1));
+          setUnreadCount((prev) => {
+            const newCount = Math.max(0, prev - 1);
+            previousUnreadCount.current = newCount;
+            return newCount;
+          });
         }
       } else if (payload.eventType === 'DELETE') {
         setNotifications((prev) => prev.filter((n) => n.id !== payload.old?.id));
         if (payload.old?.is_read === false) {
-          setUnreadCount((prev) => Math.max(0, prev - 1));
+          setUnreadCount((prev) => {
+            const newCount = Math.max(0, prev - 1);
+            previousUnreadCount.current = newCount;
+            return newCount;
+          });
         }
       }
     });
@@ -73,7 +118,7 @@ export function NotificationBell({ userId }: NotificationBellProps) {
     return () => {
       subscription.unsubscribe();
     };
-  }, [userId]);
+  }, [userId, soundEnabled]);
 
   const handleMarkAsRead = async (notificationId: string) => {
     try {
@@ -164,16 +209,27 @@ export function NotificationBell({ userId }: NotificationBellProps) {
       <DropdownMenuContent className="w-80 max-h-96 overflow-y-auto">
         <DropdownMenuLabel className="flex items-center justify-between">
           <span>Notifications</span>
-          {unreadCount > 0 && (
+          <div className="flex items-center gap-2">
             <Button
               variant="ghost"
-              size="sm"
-              className="h-auto p-1 text-xs"
-              onClick={handleMarkAllAsRead}
+              size="icon"
+              className="h-6 w-6"
+              onClick={() => setSoundEnabled(!soundEnabled)}
+              title={soundEnabled ? 'Disable sound' : 'Enable sound'}
             >
-              Mark all read
+              {soundEnabled ? <Volume2 className="size-3" /> : <VolumeX className="size-3" />}
             </Button>
-          )}
+            {unreadCount > 0 && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-auto p-1 text-xs"
+                onClick={handleMarkAllAsRead}
+              >
+                Mark all read
+              </Button>
+            )}
+          </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         {notifications.length === 0 ? (
