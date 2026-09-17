@@ -14,9 +14,18 @@ import { useRouter } from 'next/navigation';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { ArrowLeft } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { ArrowLeft, Search, Filter, X } from 'lucide-react';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import type { Project } from '@/features/projects/types';
 
 export default function ProjectsPage() {
@@ -34,6 +43,46 @@ export default function ProjectsPage() {
   const [projectToActivate, setProjectToActivate] = useState<string | null>(null);
   const [editingProject, setEditingProject] = useState<Project | null>(null);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState<'all' | 'ACTIVE' | 'ARCHIVED'>('all');
+  const [taskCountFilter, setTaskCountFilter] = useState<'all' | 'none' | 'some' | 'many'>('all');
+
+  const filteredProjects = useMemo(() => {
+    if (!projects) return [];
+
+    return projects.filter((project) => {
+      // Search filter
+      const matchesSearch =
+        searchQuery === '' ||
+        project.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (project.description &&
+          project.description.toLowerCase().includes(searchQuery.toLowerCase()));
+
+      // Status filter
+      const matchesStatus = statusFilter === 'all' || project.status === statusFilter;
+
+      // Task count filter
+      let matchesTaskCount = true;
+      if (taskCountFilter === 'none') {
+        matchesTaskCount = !project.task_count || project.task_count === 0;
+      } else if (taskCountFilter === 'some') {
+        matchesTaskCount = project.task_count && project.task_count > 0 && project.task_count < 10;
+      } else if (taskCountFilter === 'many') {
+        matchesTaskCount = project.task_count && project.task_count >= 10;
+      }
+
+      return matchesSearch && matchesStatus && matchesTaskCount;
+    });
+  }, [projects, searchQuery, statusFilter, taskCountFilter]);
+
+  const clearFilters = () => {
+    setSearchQuery('');
+    setStatusFilter('all');
+    setTaskCountFilter('all');
+  };
+
+  const hasActiveFilters =
+    searchQuery !== '' || statusFilter !== 'all' || taskCountFilter !== 'all';
 
   const handleViewProject = (projectId: string) => {
     router.push(`/dashboard/projects/${projectId}`);
@@ -201,31 +250,135 @@ export default function ProjectsPage() {
           <CreateProjectDialog workspaceId={currentWorkspace.id} />
         </div>
 
-        {!projects || projects.length === 0 ? (
+        {/* Search and Filters */}
+        <div className="mb-6 space-y-4">
+          <div className="flex flex-col sm:flex-row gap-4">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground size-4" />
+              <Input
+                placeholder="Search projects by name or description..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+            <div className="flex gap-2">
+              <Select
+                value={statusFilter}
+                onValueChange={(value: 'all' | 'ACTIVE' | 'ARCHIVED') => setStatusFilter(value)}
+              >
+                <SelectTrigger className="w-[140px]">
+                  <Filter className="size-4 mr-2" />
+                  <SelectValue placeholder="Status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Status</SelectItem>
+                  <SelectItem value="ACTIVE">Active</SelectItem>
+                  <SelectItem value="ARCHIVED">Archived</SelectItem>
+                </SelectContent>
+              </Select>
+              <Select
+                value={taskCountFilter}
+                onValueChange={(value: 'all' | 'none' | 'some' | 'many') =>
+                  setTaskCountFilter(value)
+                }
+              >
+                <SelectTrigger className="w-[140px]">
+                  <SelectValue placeholder="Tasks" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Tasks</SelectItem>
+                  <SelectItem value="none">No Tasks</SelectItem>
+                  <SelectItem value="some">1-9 Tasks</SelectItem>
+                  <SelectItem value="many">10+ Tasks</SelectItem>
+                </SelectContent>
+              </Select>
+              {hasActiveFilters && (
+                <Button variant="outline" size="icon" onClick={clearFilters}>
+                  <X className="size-4" />
+                </Button>
+              )}
+            </div>
+          </div>
+          {hasActiveFilters && (
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <span>Active filters:</span>
+              {searchQuery && (
+                <Badge variant="secondary" className="gap-1">
+                  Search: &quot;{searchQuery}&quot;
+                  <button onClick={() => setSearchQuery('')} className="hover:text-destructive">
+                    <X className="size-3" />
+                  </button>
+                </Badge>
+              )}
+              {statusFilter !== 'all' && (
+                <Badge variant="secondary" className="gap-1">
+                  Status: {statusFilter}
+                  <button onClick={() => setStatusFilter('all')} className="hover:text-destructive">
+                    <X className="size-3" />
+                  </button>
+                </Badge>
+              )}
+              {taskCountFilter !== 'all' && (
+                <Badge variant="secondary" className="gap-1">
+                  Tasks: {taskCountFilter}
+                  <button
+                    onClick={() => setTaskCountFilter('all')}
+                    className="hover:text-destructive"
+                  >
+                    <X className="size-3" />
+                  </button>
+                </Badge>
+              )}
+            </div>
+          )}
+        </div>
+
+        {!filteredProjects || filteredProjects.length === 0 ? (
           <div className="text-center py-12">
             <div className="bg-card rounded-lg shadow-lg p-8 border max-w-md mx-auto">
-              <h2 className="text-xl font-semibold mb-4">No projects yet</h2>
-              <p className="text-muted-foreground mb-6">
-                Create your first project to start organizing your tasks.
-              </p>
-              <CreateProjectDialog workspaceId={currentWorkspace.id} />
+              {hasActiveFilters ? (
+                <>
+                  <h2 className="text-xl font-semibold mb-4">No projects match your filters</h2>
+                  <p className="text-muted-foreground mb-6">
+                    Try adjusting your search or filters to find what you&apos;re looking for.
+                  </p>
+                  <Button onClick={clearFilters}>
+                    <X className="size-4 mr-2" />
+                    Clear Filters
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <h2 className="text-xl font-semibold mb-4">No projects yet</h2>
+                  <p className="text-muted-foreground mb-6">
+                    Create your first project to start organizing your tasks.
+                  </p>
+                  <CreateProjectDialog workspaceId={currentWorkspace.id} />
+                </>
+              )}
             </div>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {projects.map((project) => (
-              <ProjectCard
-                key={project.id}
-                project={project}
-                onView={handleViewProject}
-                onEdit={handleEditProject}
-                onArchive={handleArchiveProject}
-                onActivate={handleActivateProject}
-                onDelete={handleDeleteProject}
-                canEdit={true}
-              />
-            ))}
-          </div>
+          <>
+            <div className="text-sm text-muted-foreground mb-4">
+              Showing {filteredProjects.length} of {projects?.length || 0} projects
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {filteredProjects.map((project) => (
+                <ProjectCard
+                  key={project.id}
+                  project={project}
+                  onView={handleViewProject}
+                  onEdit={handleEditProject}
+                  onArchive={handleArchiveProject}
+                  onActivate={handleActivateProject}
+                  onDelete={handleDeleteProject}
+                  canEdit={true}
+                />
+              ))}
+            </div>
+          </>
         )}
       </div>
 
