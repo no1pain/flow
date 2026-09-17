@@ -4,16 +4,29 @@ import { useParams } from 'next/navigation';
 import { useWorkspaceWithMembers } from '@/features/workspace/hooks/useWorkspaces';
 import { useWorkspaceMembers } from '@/features/workspace/hooks/useWorkspaceMembers';
 import { useWorkspaceInvitations } from '@/features/workspace/hooks/useWorkspaceInvitations';
+import {
+  useUpdateWorkspaceMember,
+  useRemoveWorkspaceMember,
+} from '@/features/workspace/hooks/useWorkspaceMembers';
 import { useProjectsWithDetails } from '@/features/projects/hooks/useProjects';
 import { InviteMemberDialog } from '@/features/workspace/components/InviteMemberDialog';
 import { Avatar } from '@/components/ui/avatar';
+import { Checkbox } from '@/components/ui/checkbox';
 import type { WorkspaceMember, WorkspaceInvitationWithDetails } from '@/features/workspace/types';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Users, Settings, ArrowLeft, Trash2 } from 'lucide-react';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Users, Settings, ArrowLeft, Trash2, Shield, User } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { useState } from 'react';
 
 export default function WorkspaceDetailPage() {
   const params = useParams();
@@ -24,6 +37,64 @@ export default function WorkspaceDetailPage() {
   const { data: members, isLoading: membersLoading } = useWorkspaceMembers(workspaceId);
   const { data: invitations } = useWorkspaceInvitations(workspaceId);
   const { data: projects } = useProjectsWithDetails(workspaceId);
+  const updateMember = useUpdateWorkspaceMember();
+  const removeMember = useRemoveWorkspaceMember();
+  const [selectedMembers, setSelectedMembers] = useState<Set<string>>(new Set());
+  const [bulkRole, setBulkRole] = useState<'MEMBER' | 'ADMIN' | 'GUEST'>('MEMBER');
+  const [showBulkActions, setShowBulkActions] = useState(false);
+
+  const toggleMemberSelection = (memberId: string) => {
+    const newSelection = new Set(selectedMembers);
+    if (newSelection.has(memberId)) {
+      newSelection.delete(memberId);
+    } else {
+      newSelection.add(memberId);
+    }
+    setSelectedMembers(newSelection);
+    setShowBulkActions(newSelection.size > 0);
+  };
+
+  const toggleAllMembers = () => {
+    if (selectedMembers.size === members?.length) {
+      setSelectedMembers(new Set());
+      setShowBulkActions(false);
+    } else {
+      setSelectedMembers(new Set(members?.map((m) => m.id) || []));
+      setShowBulkActions(true);
+    }
+  };
+
+  const handleBulkRoleChange = async () => {
+    if (selectedMembers.size === 0) return;
+
+    try {
+      await Promise.all(
+        Array.from(selectedMembers).map((memberId) =>
+          updateMember.mutateAsync({ id: memberId, updates: { role: bulkRole } })
+        )
+      );
+      setSelectedMembers(new Set());
+      setShowBulkActions(false);
+    } catch (error) {
+      console.error('Failed to update member roles:', error);
+    }
+  };
+
+  const handleBulkRemove = async () => {
+    if (selectedMembers.size === 0) return;
+
+    if (!confirm(`Are you sure you want to remove ${selectedMembers.size} member(s)?`)) return;
+
+    try {
+      await Promise.all(
+        Array.from(selectedMembers).map((memberId) => removeMember.mutateAsync(memberId))
+      );
+      setSelectedMembers(new Set());
+      setShowBulkActions(false);
+    } catch (error) {
+      console.error('Failed to remove members:', error);
+    }
+  };
 
   if (workspaceLoading) {
     return (
@@ -164,10 +235,49 @@ export default function WorkspaceDetailPage() {
                     </CardTitle>
                     <CardDescription>Workspace team members</CardDescription>
                   </div>
-                  <InviteMemberDialog
-                    workspaceId={workspaceId}
-                    existingMemberIds={members?.map((m) => m.user_id) || []}
-                  />
+                  <div className="flex gap-2">
+                    {showBulkActions && (
+                      <>
+                        <Select
+                          value={bulkRole}
+                          onValueChange={(value: 'MEMBER' | 'ADMIN' | 'GUEST') =>
+                            setBulkRole(value)
+                          }
+                        >
+                          <SelectTrigger className="w-[120px]">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="MEMBER">Member</SelectItem>
+                            <SelectItem value="ADMIN">Admin</SelectItem>
+                            <SelectItem value="GUEST">Guest</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={handleBulkRoleChange}
+                          disabled={updateMember.isPending}
+                        >
+                          <Shield className="size-4 mr-2" />
+                          Update Role
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="destructive"
+                          onClick={handleBulkRemove}
+                          disabled={removeMember.isPending}
+                        >
+                          <Trash2 className="size-4 mr-2" />
+                          Remove
+                        </Button>
+                      </>
+                    )}
+                    <InviteMemberDialog
+                      workspaceId={workspaceId}
+                      existingMemberIds={members?.map((m) => m.user_id) || []}
+                    />
+                  </div>
                 </div>
               </CardHeader>
               <CardContent>
@@ -176,6 +286,7 @@ export default function WorkspaceDetailPage() {
                     {[1, 2, 3].map((i) => (
                       <div key={i} className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
+                          <Skeleton className="h-4 w-4" />
                           <Skeleton className="h-8 w-8 rounded-full" />
                           <div className="flex-1">
                             <Skeleton className="h-4 w-24 mb-2" />
@@ -188,10 +299,36 @@ export default function WorkspaceDetailPage() {
                   </div>
                 ) : (
                   <div className="space-y-3">
+                    {members && members.length > 0 && (
+                      <div className="flex items-center gap-2 pb-2 border-b">
+                        <Checkbox
+                          checked={selectedMembers.size === members.length}
+                          onCheckedChange={toggleAllMembers}
+                          aria-label="Select all members"
+                        />
+                        <span className="text-sm text-muted-foreground">
+                          {selectedMembers.size > 0
+                            ? `${selectedMembers.size} selected`
+                            : 'Select all'}
+                        </span>
+                      </div>
+                    )}
                     {members?.map(
                       (member: WorkspaceMember & { profiles: { username: string | null } }) => (
-                        <div key={member.id} className="flex items-center justify-between">
+                        <div
+                          key={member.id}
+                          className={`flex items-center justify-between p-2 rounded-lg transition-colors ${
+                            selectedMembers.has(member.id)
+                              ? 'bg-primary/5'
+                              : 'hover:bg-slate-50 dark:hover:bg-slate-800'
+                          }`}
+                        >
                           <div className="flex items-center gap-3">
+                            <Checkbox
+                              checked={selectedMembers.has(member.id)}
+                              onCheckedChange={() => toggleMemberSelection(member.id)}
+                              aria-label={`Select ${member.profiles?.username || 'member'}`}
+                            />
                             <Avatar className="size-8">
                               <div className="size-full rounded-full bg-primary flex items-center justify-center text-primary-foreground text-sm font-medium">
                                 {member.profiles?.username?.[0]?.toUpperCase() || 'U'}
