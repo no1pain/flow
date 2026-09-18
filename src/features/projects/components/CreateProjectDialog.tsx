@@ -15,7 +15,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Plus } from 'lucide-react';
+import { Card, CardContent } from '@/components/ui/card';
+import { Plus, Rocket, Code, Design, Marketing, Check } from 'lucide-react';
 import { createProject } from '../actions';
 import { cn } from '@/lib/utils';
 
@@ -24,11 +25,56 @@ interface CreateProjectDialogProps {
   trigger?: React.ReactNode;
 }
 
+const projectTemplates = [
+  {
+    id: 'blank',
+    name: 'Blank Project',
+    description: 'Start from scratch with a clean slate',
+    icon: Plus,
+    defaultName: 'My Project',
+    defaultDescription: '',
+  },
+  {
+    id: 'startup',
+    name: 'Startup MVP',
+    description: 'Perfect for building minimum viable products',
+    icon: Rocket,
+    defaultName: 'Startup MVP',
+    defaultDescription: 'Build and iterate on your minimum viable product',
+  },
+  {
+    id: 'development',
+    name: 'Software Development',
+    description: 'Organize your development workflow',
+    icon: Code,
+    defaultName: 'Software Project',
+    defaultDescription: 'Track development tasks, bugs, and features',
+  },
+  {
+    id: 'design',
+    name: 'Design Project',
+    description: 'Manage design workflows and revisions',
+    icon: Design,
+    defaultName: 'Design Project',
+    defaultDescription: 'Coordinate design tasks and creative work',
+  },
+  {
+    id: 'marketing',
+    name: 'Marketing Campaign',
+    description: 'Plan and execute marketing campaigns',
+    icon: Marketing,
+    defaultName: 'Marketing Campaign',
+    defaultDescription: 'Organize marketing activities and campaigns',
+  },
+];
+
 export function CreateProjectDialog({ workspaceId, trigger }: CreateProjectDialogProps) {
   const [open, setOpen] = useState(false);
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [isPending, setIsPending] = useState(false);
+  const [selectedTemplate, setSelectedTemplate] = useState(projectTemplates[0]);
+  const [showTemplates, setShowTemplates] = useState(true);
   const queryClient = useQueryClient();
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -45,6 +91,8 @@ export function CreateProjectDialog({ workspaceId, trigger }: CreateProjectDialo
       });
       setName('');
       setDescription('');
+      setSelectedTemplate(projectTemplates[0]);
+      setShowTemplates(true);
       setOpen(false);
       queryClient.invalidateQueries({ queryKey: ['projects'] });
     } catch (error) {
@@ -52,6 +100,19 @@ export function CreateProjectDialog({ workspaceId, trigger }: CreateProjectDialo
     } finally {
       setIsPending(false);
     }
+  };
+
+  const handleTemplateSelect = (template: (typeof projectTemplates)[0]) => {
+    setSelectedTemplate(template);
+    setName(template.defaultName);
+    setDescription(template.defaultDescription);
+    setShowTemplates(false);
+  };
+
+  const handleBackToTemplates = () => {
+    setShowTemplates(true);
+    setName('');
+    setDescription('');
   };
 
   return (
@@ -68,47 +129,106 @@ export function CreateProjectDialog({ workspaceId, trigger }: CreateProjectDialo
           </>
         )}
       </DialogTrigger>
-      <DialogContent>
+      <DialogContent className="max-w-2xl">
         <DialogHeader>
           <DialogTitle>Create Project</DialogTitle>
           <DialogDescription>
-            Create a new project to organize your tasks and collaborate with your team.
+            {showTemplates
+              ? 'Choose a template to get started quickly'
+              : 'Customize your project details'}
           </DialogDescription>
         </DialogHeader>
-        <form onSubmit={handleSubmit}>
-          <div className="space-y-4 py-4">
-            <div className="space-y-2">
-              <Label htmlFor="name">Project Name</Label>
-              <Input
-                id="name"
-                placeholder="My Project"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                required
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="description">Description (optional)</Label>
-              <Textarea
-                id="description"
-                placeholder="Describe your project..."
-                value={description}
-                onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
-                  setDescription(e.target.value)
-                }
-                rows={3}
-              />
-            </div>
+
+        {showTemplates ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 py-4">
+            {projectTemplates.map((template) => (
+              <Card
+                key={template.id}
+                className="cursor-pointer hover:ring-2 hover:ring-ring/50 transition-all"
+                onClick={() => handleTemplateSelect(template)}
+              >
+                <CardContent className="p-4">
+                  <div className="flex items-start gap-3">
+                    <div className="p-2 bg-primary/10 rounded-lg">
+                      {template.id === 'blank' && <Plus className="size-5 text-primary" />}
+                      {template.id === 'startup' && <Rocket className="size-5 text-primary" />}
+                      {template.id === 'development' && <Code className="size-5 text-primary" />}
+                      {template.id === 'design' && <Design className="size-5 text-primary" />}
+                      {template.id === 'marketing' && <Marketing className="size-5 text-primary" />}
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="font-semibold mb-1">{template.name}</h3>
+                      <p className="text-sm text-muted-foreground">{template.description}</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
           </div>
-          <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => setOpen(false)}>
-              Cancel
-            </Button>
-            <Button type="submit" disabled={isPending}>
-              {isPending ? 'Creating...' : 'Create Project'}
-            </Button>
-          </DialogFooter>
-        </form>
+        ) : (
+          <form onSubmit={handleSubmit}>
+            <div className="space-y-4 py-4">
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={handleBackToTemplates}
+                className="mb-2"
+              >
+                ← Back to templates
+              </Button>
+
+              <div className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg">
+                <div className="p-2 bg-primary/10 rounded-lg">
+                  {selectedTemplate.id === 'blank' && <Plus className="size-5 text-primary" />}
+                  {selectedTemplate.id === 'startup' && <Rocket className="size-5 text-primary" />}
+                  {selectedTemplate.id === 'development' && (
+                    <Code className="size-5 text-primary" />
+                  )}
+                  {selectedTemplate.id === 'design' && <Design className="size-5 text-primary" />}
+                  {selectedTemplate.id === 'marketing' && (
+                    <Marketing className="size-5 text-primary" />
+                  )}
+                </div>
+                <div>
+                  <p className="font-medium">{selectedTemplate.name}</p>
+                  <p className="text-sm text-muted-foreground">{selectedTemplate.description}</p>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="name">Project Name</Label>
+                <Input
+                  id="name"
+                  placeholder="My Project"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="description">Description (optional)</Label>
+                <Textarea
+                  id="description"
+                  placeholder="Describe your project..."
+                  value={description}
+                  onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
+                    setDescription(e.target.value)
+                  }
+                  rows={3}
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={() => setOpen(false)}>
+                Cancel
+              </Button>
+              <Button type="submit" disabled={isPending}>
+                {isPending ? 'Creating...' : 'Create Project'}
+              </Button>
+            </DialogFooter>
+          </form>
+        )}
       </DialogContent>
     </Dialog>
   );
