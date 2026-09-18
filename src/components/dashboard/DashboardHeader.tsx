@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '@/features/auth/hooks/useAuth';
 import { useWorkspaceStore } from '@/features/workspace/store';
 import { CommandPalette } from '@/components/command-palette/CommandPalette';
@@ -19,14 +19,15 @@ import {
 import { Menu, Search, X } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
+import { useHotkeys } from 'react-hotkeys-hook';
 
 const navItems = [
-  { label: 'Workspaces', href: '/dashboard/workspaces' },
-  { label: 'Projects', href: '/dashboard/projects' },
-  { label: 'Tasks', href: '/dashboard/tasks' },
-  { label: 'Documents', href: '/dashboard/documents' },
-  { label: 'Analytics', href: '/dashboard/analytics' },
-  { label: 'Time', href: '/dashboard/time-tracking' },
+  { label: 'Workspaces', href: '/dashboard/workspaces', shortcut: 'w' },
+  { label: 'Projects', href: '/dashboard/projects', shortcut: 'p' },
+  { label: 'Tasks', href: '/dashboard/tasks', shortcut: 't' },
+  { label: 'Documents', href: '/dashboard/documents', shortcut: 'd' },
+  { label: 'Analytics', href: '/dashboard/analytics', shortcut: 'a' },
+  { label: 'Time', href: '/dashboard/time-tracking', shortcut: 'i' },
 ];
 
 export function DashboardHeader() {
@@ -45,6 +46,59 @@ export function DashboardHeader() {
     setMobileMenuOpen(false);
     router.push(href);
   };
+
+  // Keyboard shortcuts
+  useHotkeys('mod+k', (e) => {
+    e.preventDefault();
+    setCommandPaletteOpen(true);
+  });
+
+  useHotkeys('w', (e) => {
+    if (!commandPaletteOpen) {
+      e.preventDefault();
+      router.push('/dashboard/workspaces');
+    }
+  });
+
+  useHotkeys('p', (e) => {
+    if (!commandPaletteOpen) {
+      e.preventDefault();
+      router.push('/dashboard/projects');
+    }
+  });
+
+  useHotkeys('t', (e) => {
+    if (!commandPaletteOpen) {
+      e.preventDefault();
+      router.push('/dashboard/tasks');
+    }
+  });
+
+  useHotkeys('d', (e) => {
+    if (!commandPaletteOpen) {
+      e.preventDefault();
+      router.push('/dashboard/documents');
+    }
+  });
+
+  useHotkeys('a', (e) => {
+    if (!commandPaletteOpen) {
+      e.preventDefault();
+      router.push('/dashboard/analytics');
+    }
+  });
+
+  useHotkeys('i', (e) => {
+    if (!commandPaletteOpen) {
+      e.preventDefault();
+      router.push('/dashboard/time-tracking');
+    }
+  });
+
+  useHotkeys('escape', () => {
+    setCommandPaletteOpen(false);
+    setMobileMenuOpen(false);
+  });
 
   return (
     <>
@@ -69,9 +123,13 @@ export function DashboardHeader() {
                   variant="ghost"
                   size="sm"
                   onClick={() => router.push(item.href)}
-                  className="font-heading font-semibold"
+                  className="font-heading font-semibold gap-2"
                 >
                   {item.label}
+                  <kbd className="pointer-events-none hidden lg:inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium opacity-60">
+                    <span className="text-xs">⌘</span>
+                    {item.shortcut}
+                  </kbd>
                 </Button>
               ))}
             </nav>
