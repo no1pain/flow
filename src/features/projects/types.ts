@@ -73,6 +73,7 @@ export type ProjectMemberRole = 'OWNER' | 'ADMIN' | 'MEMBER' | 'GUEST';
 export interface ProjectWithDetails extends Project {
   task_count?: number;
   member_count?: number;
+  is_favorite?: boolean;
 }
 
 export interface ProjectMemberWithProfile extends ProjectMember {

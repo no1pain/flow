@@ -132,6 +132,18 @@ export default function ProjectsPage() {
     }
   };
 
+  const handleToggleFavorite = (projectId: string) => {
+    const project = projects?.find((p) => p.id === projectId);
+    if (project) {
+      const updatedProject = {
+        ...project,
+        is_favorite: !project.is_favorite,
+      };
+      // In a real app, you'd call an API to update the favorite status
+      console.log('Toggle favorite:', projectId, updatedProject.is_favorite);
+    }
+  };
+
   // Show loading state while checking for workspace
   if (isLoading && !currentWorkspace) {
     return (
@@ -374,6 +386,7 @@ export default function ProjectsPage() {
                   onArchive={handleArchiveProject}
                   onActivate={handleActivateProject}
                   onDelete={handleDeleteProject}
+                  onToggleFavorite={handleToggleFavorite}
                   canEdit={true}
                 />
               ))}

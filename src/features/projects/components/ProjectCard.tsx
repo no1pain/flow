@@ -14,7 +14,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { MoreVertical, CheckCircle, Archive, FolderKanban, Edit, Trash2 } from 'lucide-react';
+import { MoreVertical, CheckCircle, Archive, FolderKanban, Edit, Trash2, Star } from 'lucide-react';
 import type { ProjectWithDetails } from '../types';
 
 interface ProjectCardProps {
@@ -24,6 +24,7 @@ interface ProjectCardProps {
   onArchive?: (id: string) => void;
   onActivate?: (id: string) => void;
   onDelete?: (id: string) => void;
+  onToggleFavorite?: (id: string) => void;
   canEdit?: boolean;
 }
 
@@ -34,9 +35,11 @@ export function ProjectCard({
   onArchive,
   onActivate,
   onDelete,
+  onToggleFavorite,
   canEdit = false,
 }: ProjectCardProps) {
   const isActive = project.status === 'ACTIVE';
+  const isFavorite = project.is_favorite || false;
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' || e.key === ' ') {
@@ -60,65 +63,82 @@ export function ProjectCard({
             <FolderKanban className="size-5" />
             {project.name}
           </span>
-          {canEdit && (onEdit || onArchive || onActivate || onDelete) && (
-            <CardAction>
-              <DropdownMenu>
-                <DropdownMenuTrigger
-                  className="inline-flex shrink-0 items-center justify-center rounded-lg border border-transparent bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none hover:bg-muted hover:text-foreground aria-expanded:bg-muted aria-expanded:text-foreground dark:hover:bg-muted/50 size-8 focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 active:not-aria-[haspopup]:translate-y-px disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <MoreVertical className="size-4" />
-                </DropdownMenuTrigger>
-                <DropdownMenuContent>
-                  {onEdit && (
-                    <DropdownMenuItem
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onEdit(project.id);
-                      }}
-                    >
-                      <Edit className="size-4 mr-2" />
-                      Edit
-                    </DropdownMenuItem>
-                  )}
-                  {onArchive && isActive && (
-                    <DropdownMenuItem
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onArchive(project.id);
-                      }}
-                    >
-                      <Archive className="size-4 mr-2" />
-                      Archive
-                    </DropdownMenuItem>
-                  )}
-                  {onActivate && !isActive && (
-                    <DropdownMenuItem
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onActivate(project.id);
-                      }}
-                    >
-                      <CheckCircle className="size-4 mr-2" />
-                      Activate
-                    </DropdownMenuItem>
-                  )}
-                  {onDelete && (
-                    <DropdownMenuItem
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onDelete(project.id);
-                      }}
-                      className="text-destructive"
-                    >
-                      <Trash2 className="size-4 mr-2" />
-                      Delete
-                    </DropdownMenuItem>
-                  )}
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </CardAction>
-          )}
+          <div className="flex items-center gap-1">
+            {onToggleFavorite && (
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onToggleFavorite(project.id);
+                }}
+              >
+                <Star
+                  className={`size-4 ${isFavorite ? 'fill-yellow-400 text-yellow-400' : 'text-muted-foreground'}`}
+                />
+              </Button>
+            )}
+            {canEdit && (onEdit || onArchive || onActivate || onDelete) && (
+              <CardAction>
+                <DropdownMenu>
+                  <DropdownMenuTrigger
+                    className="inline-flex shrink-0 items-center justify-center rounded-lg border border-transparent bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none hover:bg-muted hover:text-foreground aria-expanded:bg-muted aria-expanded:text-foreground dark:hover:bg-muted/50 size-8 focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 active:not-aria-[haspopup]:translate-y-px disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <MoreVertical className="size-4" />
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent>
+                    {onEdit && (
+                      <DropdownMenuItem
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onEdit(project.id);
+                        }}
+                      >
+                        <Edit className="size-4 mr-2" />
+                        Edit
+                      </DropdownMenuItem>
+                    )}
+                    {onArchive && isActive && (
+                      <DropdownMenuItem
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onArchive(project.id);
+                        }}
+                      >
+                        <Archive className="size-4 mr-2" />
+                        Archive
+                      </DropdownMenuItem>
+                    )}
+                    {onActivate && !isActive && (
+                      <DropdownMenuItem
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onActivate(project.id);
+                        }}
+                      >
+                        <CheckCircle className="size-4 mr-2" />
+                        Activate
+                      </DropdownMenuItem>
+                    )}
+                    {onDelete && (
+                      <DropdownMenuItem
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onDelete(project.id);
+                        }}
+                        className="text-destructive"
+                      >
+                        <Trash2 className="size-4 mr-2" />
+                        Delete
+                      </DropdownMenuItem>
+                    )}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </CardAction>
+            )}
+          </div>
         </CardTitle>
         {project.description && (
           <CardDescription className="line-clamp-2">{project.description}</CardDescription>
