@@ -35,10 +35,21 @@ export function WorkspaceCard({
   const canEdit = currentRole === 'OWNER' || currentRole === 'ADMIN';
   const canDelete = currentRole === 'OWNER';
 
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      onSwitch(workspace.id);
+    }
+  };
+
   return (
     <Card
-      className="hover:ring-2 hover:ring-ring/50 transition-all cursor-pointer"
+      className="hover:ring-2 hover:ring-ring/50 transition-all cursor-pointer focus:ring-2 focus:ring-ring/50 outline-none"
       onClick={() => onSwitch(workspace.id)}
+      onKeyDown={handleKeyDown}
+      tabIndex={0}
+      role="button"
+      aria-label={`Open workspace ${workspace.name}`}
     >
       <CardHeader>
         <CardTitle>{workspace.name}</CardTitle>
