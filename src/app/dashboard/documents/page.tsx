@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useWorkspaceStore } from '@/features/workspace/store';
 import { useDocuments } from '@/features/documents/hooks';
 import { DocumentList } from '@/features/documents/components/DocumentList';
@@ -32,6 +32,26 @@ export default function DocumentsPage() {
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [newDocTitle, setNewDocTitle] = useState('');
   const [isCreatingFolder, setIsCreatingFolder] = useState(false);
+  const [localDocuments, setLocalDocuments] = useState(documents || []);
+
+  // Sync local documents with fetched documents
+  useEffect(() => {
+    if (documents) {
+      setLocalDocuments(documents);
+    }
+  }, [documents]);
+
+  const handleReorderDocuments = (fromIndex: number, toIndex: number) => {
+    const reordered = [...localDocuments];
+    const [movedItem] = reordered.splice(fromIndex, 1);
+    reordered.splice(toIndex, 0, movedItem);
+    setLocalDocuments(reordered);
+    // In a real app, you'd call an API to persist the new order
+    console.log(
+      'Reordered documents:',
+      reordered.map((d) => d.id)
+    );
+  };
 
   const {
     data: documents,
@@ -241,7 +261,11 @@ export default function DocumentsPage() {
             <h2 className="font-semibold mb-4">
               {selectedFolderId ? 'Documents in folder' : 'All documents'}
             </h2>
-            <DocumentList documents={documents || []} onDocumentClick={handleDocumentClick} />
+            <DocumentList
+              documents={localDocuments}
+              onDocumentClick={handleDocumentClick}
+              onReorder={handleReorderDocuments}
+            />
           </div>
         </div>
       </div>

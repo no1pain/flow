@@ -1,6 +1,7 @@
 'use client';
 
-import { File, MoreVertical, Trash2, Share2 } from 'lucide-react';
+import { useState } from 'react';
+import { File, MoreVertical, Trash2, Share2, GripVertical } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -15,6 +16,7 @@ interface DocumentListProps {
   onDocumentClick: (document: Document) => void;
   onDeleteDocument?: (documentId: string) => void;
   onShareDocument?: (document: Document) => void;
+  onReorder?: (fromIndex: number, toIndex: number) => void;
 }
 
 export function DocumentList({
@@ -22,7 +24,32 @@ export function DocumentList({
   onDocumentClick,
   onDeleteDocument,
   onShareDocument,
+  onReorder,
 }: DocumentListProps) {
+  const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
+
+  const handleDragStart = (e: React.DragEvent, index: number) => {
+    setDraggedIndex(index);
+    e.dataTransfer.effectAllowed = 'move';
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+  };
+
+  const handleDrop = (e: React.DragEvent, dropIndex: number) => {
+    e.preventDefault();
+    if (draggedIndex !== null && draggedIndex !== dropIndex && onReorder) {
+      onReorder(draggedIndex, dropIndex);
+    }
+    setDraggedIndex(null);
+  };
+
+  const handleDragEnd = () => {
+    setDraggedIndex(null);
+  };
+
   if (documents.length === 0) {
     return (
       <div className="text-center py-12 text-muted-foreground">
@@ -34,12 +61,22 @@ export function DocumentList({
 
   return (
     <div className="space-y-2">
-      {documents.map((document) => (
+      {documents.map((document, index) => (
         <div
           key={document.id}
-          className="flex items-center gap-3 p-3 rounded-lg hover:bg-accent cursor-pointer group"
+          draggable={onReorder ? true : false}
+          onDragStart={(e) => handleDragStart(e, index)}
+          onDragOver={handleDragOver}
+          onDrop={(e) => handleDrop(e, index)}
+          onDragEnd={handleDragEnd}
+          className={`flex items-center gap-3 p-3 rounded-lg hover:bg-accent cursor-pointer group transition-all ${
+            draggedIndex === index ? 'opacity-50 scale-95' : ''
+          } ${onReorder ? 'cursor-move' : ''}`}
           onClick={() => onDocumentClick(document)}
         >
+          {onReorder && (
+            <GripVertical className="h-4 w-4 text-muted-foreground cursor-grab active:cursor-grabbing" />
+          )}
           <File className="h-5 w-5 text-muted-foreground" />
           <div className="flex-1 min-w-0">
             <h3 className="font-medium truncate">{document.title}</h3>
