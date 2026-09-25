@@ -4,6 +4,7 @@ import { useWorkspaceStore } from '@/features/workspace/store';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
+import { CopyButton } from '@/components/ui/copy-button';
 import {
   ArrowLeft,
   FolderKanban,
@@ -293,7 +294,10 @@ export default function DashboardPage() {
               </div>
               <div>
                 <p className="text-sm text-muted-foreground mb-1">Workspace ID</p>
-                <p className="font-medium text-xs font-mono">{currentWorkspace.id}</p>
+                <div className="flex items-center gap-2">
+                  <p className="font-medium text-xs font-mono">{currentWorkspace.id}</p>
+                  <CopyButton text={currentWorkspace.id} />
+                </div>
               </div>
             </div>
           </CardContent>

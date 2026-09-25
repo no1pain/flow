@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
+import { CopyButton } from '@/components/ui/copy-button';
 import {
   ArrowLeft,
   Settings,
@@ -307,7 +308,10 @@ export default function ProjectDetailPage() {
                   </div>
                   <div>
                     <p className="text-sm text-muted-foreground">Project ID</p>
-                    <p className="font-medium text-xs font-mono">{project.id}</p>
+                    <div className="flex items-center gap-2">
+                      <p className="font-medium text-xs font-mono">{project.id}</p>
+                      <CopyButton text={project.id} />
+                    </div>
                   </div>
                 </div>
               </CardContent>
