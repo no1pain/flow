@@ -16,9 +16,10 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent } from '@/components/ui/card';
-import { Plus, Rocket, Code, Design, Marketing, Check } from 'lucide-react';
+import { Plus, Rocket, Code, Design, Marketing } from 'lucide-react';
 import { createProject } from '../actions';
 import { cn } from '@/lib/utils';
+import { useToast } from '@/hooks/use-toast';
 
 interface CreateProjectDialogProps {
   workspaceId: string;
@@ -76,6 +77,7 @@ export function CreateProjectDialog({ workspaceId, trigger }: CreateProjectDialo
   const [selectedTemplate, setSelectedTemplate] = useState(projectTemplates[0]);
   const [showTemplates, setShowTemplates] = useState(true);
   const queryClient = useQueryClient();
+  const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -95,8 +97,18 @@ export function CreateProjectDialog({ workspaceId, trigger }: CreateProjectDialo
       setShowTemplates(true);
       setOpen(false);
       queryClient.invalidateQueries({ queryKey: ['projects'] });
+      toast({
+        title: 'Project created successfully',
+        description: `"${name}" has been added to your workspace`,
+        variant: 'success',
+      });
     } catch (error) {
       console.error('Failed to create project:', error);
+      toast({
+        title: 'Failed to create project',
+        description: 'Please try again or contact support',
+        variant: 'destructive',
+      });
     } finally {
       setIsPending(false);
     }
