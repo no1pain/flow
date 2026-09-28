@@ -4,9 +4,9 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { CardContent } from '@/components/ui/card';
-import { Skeleton } from '@/components/ui/skeleton';
 import { Trash2, Crown, Shield, User } from 'lucide-react';
 import { useProjectMembers, useRemoveProjectMember } from '../hooks/useProjects';
+import { MemberItemSkeleton } from '@/components/ui/skeleton-cards';
 
 interface ProjectMembersListProps {
   projectId: string;
@@ -44,13 +44,7 @@ export function ProjectMembersList({ projectId, canEdit = false }: ProjectMember
       <CardContent>
         <div className="space-y-3">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="flex items-center gap-3">
-              <Skeleton className="h-8 w-8 rounded-full" />
-              <div className="flex-1">
-                <Skeleton className="h-4 w-32 mb-2" />
-                <Skeleton className="h-3 w-24" />
-              </div>
-            </div>
+            <MemberItemSkeleton key={i} />
           ))}
         </div>
       </CardContent>

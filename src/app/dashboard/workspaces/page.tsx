@@ -8,6 +8,7 @@ import { useWorkspaceStore } from '@/features/workspace/store';
 import { useRouter } from 'next/navigation';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
+import { WorkspaceCardSkeleton } from '@/components/ui/skeleton-cards';
 import { useState } from 'react';
 import type { Workspace, WorkspaceWithMembers } from '@/features/workspace/types';
 
@@ -71,7 +72,7 @@ export default function WorkspacesPage() {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {[1, 2, 3].map((i) => (
-              <Skeleton key={i} className="h-48 rounded-xl" />
+              <WorkspaceCardSkeleton key={i} />
             ))}
           </div>
         </div>

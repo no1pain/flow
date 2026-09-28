@@ -9,6 +9,7 @@ import {
 import { ProjectCard } from '@/features/projects/components/ProjectCard';
 import { CreateProjectDialog } from '@/features/projects/components/CreateProjectDialog';
 import { EditProjectDialog } from '@/features/projects/components/EditProjectDialog';
+import { ProjectCardSkeleton } from '@/components/ui/skeleton-cards';
 import { useWorkspaceStore } from '@/features/workspace/store';
 import { useRouter } from 'next/navigation';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -157,7 +158,7 @@ export default function ProjectsPage() {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {[1, 2, 3].map((i) => (
-              <Skeleton key={i} className="h-48 rounded-xl" />
+              <ProjectCardSkeleton key={i} />
             ))}
           </div>
         </div>
@@ -223,7 +224,7 @@ export default function ProjectsPage() {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {[1, 2, 3].map((i) => (
-              <Skeleton key={i} className="h-48 rounded-xl" />
+              <ProjectCardSkeleton key={i} />
             ))}
           </div>
         </div>
