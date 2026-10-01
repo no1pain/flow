@@ -58,6 +58,7 @@ A modern development platform that streamlines your team's workflow — from pro
 - **Dark/light theme** toggle
 - Fully responsive design for mobile and desktop
 - Keyboard shortcuts throughout
+- Scroll-to-top button on long pages
 
 ## 🛠️ Tech Stack
 
