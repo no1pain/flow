@@ -15,22 +15,22 @@ export function Footer() {
             <h4 className="mb-4 font-semibold">Product</h4>
             <ul className="space-y-2 text-sm text-muted-foreground">
               <li>
-                <a href="#features" className="hover:text-foreground">
+                <a href="#features" className="transition-colors hover:text-foreground">
                   Features
                 </a>
               </li>
               <li>
-                <a href="#" className="hover:text-foreground">
+                <a href="#" className="transition-colors hover:text-foreground">
                   Pricing
                 </a>
               </li>
               <li>
-                <a href="#" className="hover:text-foreground">
+                <a href="#" className="transition-colors hover:text-foreground">
                   Documentation
                 </a>
               </li>
               <li>
-                <a href="#" className="hover:text-foreground">
+                <a href="#" className="transition-colors hover:text-foreground">
                   Changelog
                 </a>
               </li>
@@ -40,22 +40,25 @@ export function Footer() {
             <h4 className="mb-4 font-semibold">Company</h4>
             <ul className="space-y-2 text-sm text-muted-foreground">
               <li>
-                <a href="#" className="hover:text-foreground">
+                <a href="#" className="transition-colors hover:text-foreground">
                   About
                 </a>
               </li>
               <li>
-                <a href="#" className="hover:text-foreground">
+                <a href="#" className="transition-colors hover:text-foreground">
                   Blog
                 </a>
               </li>
               <li>
-                <a href="#" className="hover:text-foreground">
+                <a href="#" className="transition-colors hover:text-foreground">
                   Careers
                 </a>
               </li>
               <li>
-                <a href="mailto:contact@flow.dev" className="hover:text-foreground">
+                <a
+                  href="mailto:contact@flow.dev"
+                  className="transition-colors hover:text-foreground"
+                >
                   Contact
                 </a>
               </li>
